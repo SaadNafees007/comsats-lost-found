@@ -4,7 +4,7 @@ import '../models/item_model.dart';
 
 class ItemRemoteDataSource {
   ItemRemoteDataSource({FirebaseFirestore? firestore})
-    : _firestore = firestore ?? FirebaseFirestore.instance;
+      : _firestore = firestore ?? FirebaseFirestore.instance;
 
   final FirebaseFirestore _firestore;
 
@@ -12,15 +12,20 @@ class ItemRemoteDataSource {
       _firestore.collection('items');
 
   Future<ItemModel> createItem(ItemModel item) async {
-    final document = await _itemsCollection.add(item.toFirestore());
+    final document = await _itemsCollection
+        .add(item.toFirestore())
+        .timeout(const Duration(seconds: 15));
 
-    final snapshot = await document.get();
+    final snapshot = await document.get().timeout(const Duration(seconds: 15));
 
     return ItemModel.fromFirestore(snapshot);
   }
 
   Future<ItemModel?> getItem(String itemId) async {
-    final document = await _itemsCollection.doc(itemId).get();
+    final document = await _itemsCollection
+        .doc(itemId)
+        .get()
+        .timeout(const Duration(seconds: 15));
 
     if (!document.exists) {
       return null;
@@ -30,25 +35,43 @@ class ItemRemoteDataSource {
   }
 
   Stream<List<ItemModel>> getItems() {
-    return _itemsCollection
-        .orderBy('createdAt', descending: true)
-        .snapshots()
-        .map((snapshot) => snapshot.docs.map(ItemModel.fromFirestore).toList());
+    return _itemsCollection.snapshots().map((snapshot) {
+      final items = snapshot.docs.map(ItemModel.fromFirestore).toList();
+      items.sort((a, b) {
+        final aTime = a.createdAt ?? a.date;
+        final bTime = b.createdAt ?? b.date;
+        return bTime.compareTo(aTime);
+      });
+      return items;
+    });
   }
 
   Stream<List<ItemModel>> getMyItems(String ownerId) {
     return _itemsCollection
         .where('ownerId', isEqualTo: ownerId)
-        .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs.map(ItemModel.fromFirestore).toList());
+        .map((snapshot) {
+      final items = snapshot.docs.map(ItemModel.fromFirestore).toList();
+      items.sort((a, b) {
+        final aTime = a.createdAt ?? a.date;
+        final bTime = b.createdAt ?? b.date;
+        return bTime.compareTo(aTime);
+      });
+      return items;
+    });
   }
 
   Future<void> updateItem(ItemModel item) {
-    return _itemsCollection.doc(item.id).update(item.toFirestore());
+    return _itemsCollection
+        .doc(item.id)
+        .update(item.toFirestore())
+        .timeout(const Duration(seconds: 15));
   }
 
   Future<void> deleteItem(String itemId) {
-    return _itemsCollection.doc(itemId).delete();
+    return _itemsCollection
+        .doc(itemId)
+        .delete()
+        .timeout(const Duration(seconds: 15));
   }
 }

@@ -1,9 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../../app/router/app_routes.dart';
+import '../../../../core/services/storage_service.dart';
+import '../../../../shared/widgets/inputs/image_picker_field.dart';
 import '../../domain/entities/item_entity.dart';
 import '../providers/item_provider.dart';
 
@@ -22,8 +26,10 @@ class _CreateFoundPageState extends ConsumerState<CreateFoundPage> {
   final _categoryController = TextEditingController();
   final _locationController = TextEditingController();
 
+  List<XFile> _selectedImages = [];
   DateTime _selectedDate = DateTime.now();
   bool _isLoading = false;
+  String _loadingMessage = 'Reporting item...';
 
   @override
   void dispose() {
@@ -67,9 +73,32 @@ class _CreateFoundPageState extends ConsumerState<CreateFoundPage> {
 
     setState(() {
       _isLoading = true;
+      _loadingMessage = _selectedImages.isNotEmpty
+          ? 'Uploading photos...'
+          : 'Reporting found item...';
     });
 
     try {
+      // Step 1: Upload photos to Firebase Storage
+      List<String> imageUrls = const [];
+      if (_selectedImages.isNotEmpty) {
+        try {
+          imageUrls = await ref.read(storageServiceProvider).uploadItemImages(
+                userId: user.uid,
+                images: _selectedImages,
+              );
+        } catch (storageError) {
+          debugPrint('[CreateFoundPage] Storage upload error: $storageError');
+        }
+      }
+
+      if (!mounted) return;
+
+      setState(() {
+        _loadingMessage = 'Saving report...';
+      });
+
+      // Step 2: Create item record in Firestore
       final item = ItemEntity(
         id: '',
         ownerId: user.uid,
@@ -79,7 +108,7 @@ class _CreateFoundPageState extends ConsumerState<CreateFoundPage> {
         category: _categoryController.text.trim(),
         location: _locationController.text.trim(),
         date: _selectedDate,
-        imageUrls: const [],
+        imageUrls: imageUrls,
         status: ItemStatus.active,
         createdAt: null,
         updatedAt: null,
@@ -89,26 +118,27 @@ class _CreateFoundPageState extends ConsumerState<CreateFoundPage> {
 
       if (!mounted) return;
 
+      ref.invalidate(itemsProvider);
+      ref.invalidate(myItemsProvider);
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Found item reported successfully.')),
       );
 
       context.go(AppRoutes.home);
-    } on FirebaseException catch (e) {
+    } on FirebaseException catch (e, stack) {
+      debugPrint('[CreateFoundPage] FirebaseException: ${e.code} - ${e.message}\n$stack');
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.message ?? 'Unable to report the found item.'),
-        ),
+        SnackBar(content: Text('Error: ${e.message ?? e.code}')),
       );
-    } catch (_) {
+    } catch (e, stack) {
+      debugPrint('[CreateFoundPage] Generic error: $e\n$stack');
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Something went wrong. Please try again.'),
-        ),
+        SnackBar(content: Text('Unable to save item: $e')),
       );
     } finally {
       if (mounted) {
@@ -148,100 +178,82 @@ class _CreateFoundPageState extends ConsumerState<CreateFoundPage> {
                   'Report a Found Item',
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
                 ),
-
                 const SizedBox(height: 8),
-
                 const Text(
-                  'Provide accurate information so the owner can identify and recover the item.',
+                  'Help reunite this item with its rightful owner by providing accurate details and photos.',
                 ),
-
                 const SizedBox(height: 24),
-
                 TextFormField(
                   controller: _titleController,
                   textInputAction: TextInputAction.next,
                   decoration: _inputDecoration(
                     label: 'Item Title',
-                    hint: 'e.g. Black Wallet',
+                    hint: 'e.g. Student ID Card or USB Drive',
                     icon: Icons.title_outlined,
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return 'Please enter an item title.';
                     }
-
                     if (value.trim().length < 3) {
                       return 'Title must be at least 3 characters.';
                     }
-
                     return null;
                   },
                 ),
-
                 const SizedBox(height: 16),
-
                 TextFormField(
                   controller: _categoryController,
                   textInputAction: TextInputAction.next,
                   decoration: _inputDecoration(
                     label: 'Category',
-                    hint: 'e.g. Electronics, Wallet, Documents',
+                    hint: 'e.g. Cards, Electronics, Keys, Bags',
                     icon: Icons.category_outlined,
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return 'Please enter a category.';
                     }
-
                     return null;
                   },
                 ),
-
                 const SizedBox(height: 16),
-
                 TextFormField(
                   controller: _locationController,
                   textInputAction: TextInputAction.next,
                   decoration: _inputDecoration(
-                    label: 'Found Location',
-                    hint: 'e.g. Library, Cafeteria, Block A',
+                    label: 'Found Location / Safe Handover Point',
+                    hint: 'e.g. Library Desk, CS Dept Reception',
                     icon: Icons.location_on_outlined,
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return 'Please enter the location.';
+                      return 'Please enter where it was found.';
                     }
-
                     return null;
                   },
                 ),
-
                 const SizedBox(height: 16),
-
                 TextFormField(
                   controller: _descriptionController,
-                  minLines: 4,
-                  maxLines: 6,
+                  minLines: 3,
+                  maxLines: 5,
                   decoration: _inputDecoration(
                     label: 'Description',
-                    hint: 'Describe the item, identifying marks, color, etc.',
+                    hint: 'Describe the item and where the owner can retrieve it.',
                     icon: Icons.description_outlined,
                   ),
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return 'Please enter a description.';
                     }
-
                     if (value.trim().length < 10) {
                       return 'Please provide a more detailed description.';
                     }
-
                     return null;
                   },
                 ),
-
                 const SizedBox(height: 16),
-
                 InkWell(
                   onTap: _isLoading ? null : _selectDate,
                   borderRadius: BorderRadius.circular(4),
@@ -257,18 +269,35 @@ class _CreateFoundPageState extends ConsumerState<CreateFoundPage> {
                     ),
                   ),
                 ),
-
+                const SizedBox(height: 20),
+                ImagePickerField(
+                  onImagesChanged: (images) {
+                    _selectedImages = images;
+                  },
+                ),
                 const SizedBox(height: 28),
-
                 SizedBox(
                   height: 52,
                   child: ElevatedButton(
                     onPressed: _isLoading ? null : _submit,
                     child: _isLoading
-                        ? const SizedBox(
-                            width: 22,
-                            height: 22,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                        ? Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                _loadingMessage,
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                            ],
                           )
                         : const Text('Report Found Item'),
                   ),

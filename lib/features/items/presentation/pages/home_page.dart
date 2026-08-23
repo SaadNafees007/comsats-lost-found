@@ -1,9 +1,11 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_routes.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../../shared/widgets/navigation/bottom_navigation.dart';
 import '../../domain/entities/item_entity.dart';
 import '../providers/item_provider.dart';
 
@@ -76,7 +78,6 @@ class _HomePageState extends ConsumerState<HomePage> {
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: 16),
-
                 ListTile(
                   leading: const Icon(Icons.all_inclusive),
                   title: const Text('All Items'),
@@ -90,7 +91,6 @@ class _HomePageState extends ConsumerState<HomePage> {
                     Navigator.pop(context);
                   },
                 ),
-
                 ListTile(
                   leading: Icon(Icons.search, color: AppColors.error),
                   title: const Text('Lost Items'),
@@ -104,7 +104,6 @@ class _HomePageState extends ConsumerState<HomePage> {
                     Navigator.pop(context);
                   },
                 ),
-
                 ListTile(
                   leading: Icon(
                     Icons.inventory_2_outlined,
@@ -160,18 +159,14 @@ class _HomePageState extends ConsumerState<HomePage> {
                   'Find what you lost',
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
                 ),
-
                 const SizedBox(height: 8),
-
                 Text(
                   'Browse recently reported lost and found items.',
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
-
                 const SizedBox(height: 24),
-
                 TextField(
                   controller: _searchController,
                   decoration: InputDecoration(
@@ -185,16 +180,12 @@ class _HomePageState extends ConsumerState<HomePage> {
                     border: const OutlineInputBorder(),
                   ),
                 ),
-
                 const SizedBox(height: 28),
-
                 const Text(
                   'Quick Actions',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                 ),
-
                 const SizedBox(height: 16),
-
                 Row(
                   children: [
                     Expanded(
@@ -220,9 +211,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 32),
-
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -244,9 +233,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                       ),
                   ],
                 ),
-
                 const SizedBox(height: 16),
-
                 itemsAsync.when(
                   loading: () => const Padding(
                     padding: EdgeInsets.symmetric(vertical: 40),
@@ -278,9 +265,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                                 onTap: () {
                                   context.push(
                                     '${AppRoutes.itemDetails}/${item.id}',
-                                    extra: item,
                                   );
-                                  // Item details will be connected next.
                                 },
                               ),
                             ),
@@ -294,6 +279,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           ),
         ),
       ),
+      bottomNavigationBar: const AppBottomNavigation(currentIndex: 0),
     );
   }
 }
@@ -348,9 +334,7 @@ class _ItemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isLost = item.type == ItemType.lost;
-
     final typeColor = isLost ? AppColors.error : AppColors.success;
-
     final typeText = isLost ? 'LOST' : 'FOUND';
 
     return InkWell(
@@ -397,28 +381,60 @@ class _ItemCard extends StatelessWidget {
                 ),
               ],
             ),
-
             const SizedBox(height: 12),
-
-            Text(
-              item.title,
-              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.title,
+                        style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        item.description,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (item.imageUrls.isNotEmpty) ...[
+                  const SizedBox(width: 12),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: CachedNetworkImage(
+                      imageUrl: item.imageUrls.first,
+                      width: 64,
+                      height: 64,
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) => Container(
+                        width: 64,
+                        height: 64,
+                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                        child: const Center(
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      ),
+                      errorWidget: (context, url, error) => Container(
+                        width: 64,
+                        height: 64,
+                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                        child: const Icon(Icons.image_outlined, size: 24),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
             ),
-
-            const SizedBox(height: 6),
-
-            Text(
-              item.description,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                fontSize: 13,
-              ),
-            ),
-
             const SizedBox(height: 12),
-
             Row(
               children: [
                 const Icon(Icons.location_on_outlined, size: 17),
@@ -428,9 +444,7 @@ class _ItemCard extends StatelessWidget {
                 ),
               ],
             ),
-
             const SizedBox(height: 6),
-
             Row(
               children: [
                 const Icon(Icons.calendar_today_outlined, size: 16),
@@ -472,16 +486,12 @@ class _EmptyItemsView extends StatelessWidget {
             size: 48,
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
-
           const SizedBox(height: 12),
-
           Text(
             hasSearch ? 'No matching items' : 'No recent items',
             style: const TextStyle(fontWeight: FontWeight.w600),
           ),
-
           const SizedBox(height: 6),
-
           Text(
             hasSearch
                 ? 'Try a different search or filter.'

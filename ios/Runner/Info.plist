@@ -26,6 +26,11 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>COMSATS Lost &amp; Found needs access to your camera to take pictures of lost or found items.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>COMSATS Lost &amp; Found needs access to your photo library to attach pictures of lost or found items.</string>
+
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
