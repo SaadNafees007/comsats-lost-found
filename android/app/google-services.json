@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "762254696459",
+    "project_id": "comsats-lost-found",
+    "storage_bucket": "comsats-lost-found.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:762254696459:android:5e33c01ccbaef5ab58670e",
+        "android_client_info": {
+          "package_name": "com.comsats.lostfound"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBAcnywwHajesy6IgAfQwzkf3yp6VPyaRI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

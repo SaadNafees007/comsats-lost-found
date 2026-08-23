@@ -12,19 +12,20 @@ class AppTheme {
   // ============================================================
 
   static ThemeData get light {
-    final colorScheme = ColorScheme.fromSeed(
-      seedColor: AppColors.primary,
-      brightness: Brightness.light,
-    ).copyWith(
-      primary: AppColors.primary,
-      onPrimary: Colors.white,
-      secondary: AppColors.secondary,
-      onSecondary: Colors.white,
-      surface: AppColors.lightSurface,
-      onSurface: AppColors.lightText,
-      error: AppColors.error,
-      onError: Colors.white,
-    );
+    final colorScheme =
+        ColorScheme.fromSeed(
+          seedColor: AppColors.primary,
+          brightness: Brightness.light,
+        ).copyWith(
+          primary: AppColors.primary,
+          onPrimary: Colors.white,
+          secondary: AppColors.secondary,
+          onSecondary: Colors.white,
+          surface: AppColors.lightSurface,
+          onSurface: AppColors.lightText,
+          error: AppColors.error,
+          onError: Colors.white,
+        );
 
     return ThemeData(
       useMaterial3: true,
@@ -40,7 +41,6 @@ class AppTheme {
       // ----------------------------------------------------------
       // App Bar
       // ----------------------------------------------------------
-
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.lightSurface,
         foregroundColor: AppColors.lightText,
@@ -52,21 +52,17 @@ class AppTheme {
       // ----------------------------------------------------------
       // Card
       // ----------------------------------------------------------
-
       cardTheme: CardThemeData(
         color: AppColors.lightSurface,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         margin: EdgeInsets.zero,
       ),
 
       // ----------------------------------------------------------
       // Input Fields
       // ----------------------------------------------------------
-
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.lightSurface,
@@ -78,50 +74,35 @@ class AppTheme {
 
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: AppColors.divider,
-          ),
+          borderSide: const BorderSide(color: AppColors.divider),
         ),
 
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: AppColors.divider,
-          ),
+          borderSide: const BorderSide(color: AppColors.divider),
         ),
 
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: AppColors.primary,
-            width: 1.5,
-          ),
+          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
         ),
 
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: AppColors.error,
-          ),
+          borderSide: const BorderSide(color: AppColors.error),
         ),
 
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: AppColors.error,
-            width: 1.5,
-          ),
+          borderSide: const BorderSide(color: AppColors.error, width: 1.5),
         ),
 
-        hintStyle: const TextStyle(
-          color: AppColors.lightSubtitle,
-        ),
+        hintStyle: const TextStyle(color: AppColors.lightSubtitle),
       ),
 
       // ----------------------------------------------------------
       // Elevated Buttons
       // ----------------------------------------------------------
-
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
@@ -129,10 +110,7 @@ class AppTheme {
 
           elevation: 0,
 
-          minimumSize: const Size(
-            double.infinity,
-            52,
-          ),
+          minimumSize: const Size(double.infinity, 52),
 
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -149,19 +127,13 @@ class AppTheme {
       // ----------------------------------------------------------
       // Outlined Buttons
       // ----------------------------------------------------------
-
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.primary,
 
-          minimumSize: const Size(
-            double.infinity,
-            52,
-          ),
+          minimumSize: const Size(double.infinity, 52),
 
-          side: const BorderSide(
-            color: AppColors.primary,
-          ),
+          side: const BorderSide(color: AppColors.primary),
 
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -178,7 +150,6 @@ class AppTheme {
       // ----------------------------------------------------------
       // Text Buttons
       // ----------------------------------------------------------
-
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: AppColors.primary,
@@ -194,7 +165,6 @@ class AppTheme {
       // ----------------------------------------------------------
       // Floating Action Button
       // ----------------------------------------------------------
-
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
@@ -204,7 +174,6 @@ class AppTheme {
       // ----------------------------------------------------------
       // Divider
       // ----------------------------------------------------------
-
       dividerTheme: const DividerThemeData(
         color: AppColors.divider,
         thickness: 1,
@@ -214,12 +183,9 @@ class AppTheme {
       // ----------------------------------------------------------
       // Snack Bar
       // ----------------------------------------------------------
-
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         contentTextStyle: const TextStyle(
           fontFamily: AppTypography.fontFamily,
           fontSize: 14,
@@ -231,7 +197,6 @@ class AppTheme {
       // ----------------------------------------------------------
       // Progress Indicator
       // ----------------------------------------------------------
-
       progressIndicatorTheme: const ProgressIndicatorThemeData(
         color: AppColors.primary,
       ),
@@ -243,19 +208,20 @@ class AppTheme {
   // ============================================================
 
   static ThemeData get dark {
-    final colorScheme = ColorScheme.fromSeed(
-      seedColor: AppColors.primary,
-      brightness: Brightness.dark,
-    ).copyWith(
-      primary: AppColors.primary,
-      onPrimary: Colors.white,
-      secondary: AppColors.secondary,
-      onSecondary: Colors.white,
-      surface: AppColors.darkSurface,
-      onSurface: AppColors.darkText,
-      error: AppColors.error,
-      onError: Colors.white,
-    );
+    final colorScheme =
+        ColorScheme.fromSeed(
+          seedColor: AppColors.primary,
+          brightness: Brightness.dark,
+        ).copyWith(
+          primary: AppColors.primary,
+          onPrimary: Colors.white,
+          secondary: AppColors.secondary,
+          onSecondary: Colors.white,
+          surface: AppColors.darkSurface,
+          onSurface: AppColors.darkText,
+          error: AppColors.error,
+          onError: Colors.white,
+        );
 
     return ThemeData(
       useMaterial3: true,
@@ -271,7 +237,6 @@ class AppTheme {
       // ----------------------------------------------------------
       // App Bar
       // ----------------------------------------------------------
-
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.darkSurface,
         foregroundColor: AppColors.darkText,
@@ -283,21 +248,17 @@ class AppTheme {
       // ----------------------------------------------------------
       // Card
       // ----------------------------------------------------------
-
       cardTheme: CardThemeData(
         color: AppColors.darkSurface,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         margin: EdgeInsets.zero,
       ),
 
       // ----------------------------------------------------------
       // Input Fields
       // ----------------------------------------------------------
-
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: AppColors.darkSurface,
@@ -309,50 +270,35 @@ class AppTheme {
 
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: AppColors.divider,
-          ),
+          borderSide: const BorderSide(color: AppColors.divider),
         ),
 
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: AppColors.divider,
-          ),
+          borderSide: const BorderSide(color: AppColors.divider),
         ),
 
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: AppColors.primary,
-            width: 1.5,
-          ),
+          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
         ),
 
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: AppColors.error,
-          ),
+          borderSide: const BorderSide(color: AppColors.error),
         ),
 
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(
-            color: AppColors.error,
-            width: 1.5,
-          ),
+          borderSide: const BorderSide(color: AppColors.error, width: 1.5),
         ),
 
-        hintStyle: const TextStyle(
-          color: AppColors.darkSubtitle,
-        ),
+        hintStyle: const TextStyle(color: AppColors.darkSubtitle),
       ),
 
       // ----------------------------------------------------------
       // Elevated Buttons
       // ----------------------------------------------------------
-
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
@@ -360,10 +306,7 @@ class AppTheme {
 
           elevation: 0,
 
-          minimumSize: const Size(
-            double.infinity,
-            52,
-          ),
+          minimumSize: const Size(double.infinity, 52),
 
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -380,19 +323,13 @@ class AppTheme {
       // ----------------------------------------------------------
       // Outlined Buttons
       // ----------------------------------------------------------
-
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.primary,
 
-          minimumSize: const Size(
-            double.infinity,
-            52,
-          ),
+          minimumSize: const Size(double.infinity, 52),
 
-          side: const BorderSide(
-            color: AppColors.primary,
-          ),
+          side: const BorderSide(color: AppColors.primary),
 
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -409,7 +346,6 @@ class AppTheme {
       // ----------------------------------------------------------
       // Text Buttons
       // ----------------------------------------------------------
-
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: AppColors.primary,
@@ -425,7 +361,6 @@ class AppTheme {
       // ----------------------------------------------------------
       // Floating Action Button
       // ----------------------------------------------------------
-
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
@@ -435,7 +370,6 @@ class AppTheme {
       // ----------------------------------------------------------
       // Divider
       // ----------------------------------------------------------
-
       dividerTheme: const DividerThemeData(
         color: AppColors.divider,
         thickness: 1,
@@ -445,12 +379,9 @@ class AppTheme {
       // ----------------------------------------------------------
       // Snack Bar
       // ----------------------------------------------------------
-
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         contentTextStyle: const TextStyle(
           fontFamily: AppTypography.fontFamily,
           fontSize: 14,
@@ -462,7 +393,6 @@ class AppTheme {
       // ----------------------------------------------------------
       // Progress Indicator
       // ----------------------------------------------------------
-
       progressIndicatorTheme: const ProgressIndicatorThemeData(
         color: AppColors.primary,
       ),
