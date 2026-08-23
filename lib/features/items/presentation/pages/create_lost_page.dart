@@ -1,5 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -83,10 +82,9 @@ class _CreateLostPageState extends ConsumerState<CreateLostPage> {
       List<String> imageUrls = const [];
       if (_selectedImages.isNotEmpty) {
         try {
-          imageUrls = await ref.read(storageServiceProvider).uploadItemImages(
-                userId: user.uid,
-                images: _selectedImages,
-              );
+          imageUrls = await ref
+              .read(storageServiceProvider)
+              .uploadItemImages(userId: user.uid, images: _selectedImages);
         } catch (storageError) {
           debugPrint('[CreateLostPage] Storage upload error: $storageError');
         }
@@ -127,19 +125,21 @@ class _CreateLostPageState extends ConsumerState<CreateLostPage> {
 
       context.go(AppRoutes.home);
     } on FirebaseException catch (e, stack) {
-      debugPrint('[CreateLostPage] FirebaseException: ${e.code} - ${e.message}\n$stack');
+      debugPrint(
+        '[CreateLostPage] FirebaseException: ${e.code} - ${e.message}\n$stack',
+      );
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.message ?? e.code}')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: ${e.message ?? e.code}')));
     } catch (e, stack) {
       debugPrint('[CreateLostPage] Generic error: $e\n$stack');
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Unable to save item: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Unable to save item: $e')));
     } finally {
       if (mounted) {
         setState(() {
@@ -240,7 +240,8 @@ class _CreateLostPageState extends ConsumerState<CreateLostPage> {
                   maxLines: 5,
                   decoration: _inputDecoration(
                     label: 'Description',
-                    hint: 'Describe identifying marks, color, brand, contents, etc.',
+                    hint:
+                        'Describe identifying marks, color, brand, contents, etc.',
                     icon: Icons.description_outlined,
                   ),
                   validator: (value) {

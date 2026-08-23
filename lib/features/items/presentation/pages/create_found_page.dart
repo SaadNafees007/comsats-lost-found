@@ -1,5 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -83,10 +82,9 @@ class _CreateFoundPageState extends ConsumerState<CreateFoundPage> {
       List<String> imageUrls = const [];
       if (_selectedImages.isNotEmpty) {
         try {
-          imageUrls = await ref.read(storageServiceProvider).uploadItemImages(
-                userId: user.uid,
-                images: _selectedImages,
-              );
+          imageUrls = await ref
+              .read(storageServiceProvider)
+              .uploadItemImages(userId: user.uid, images: _selectedImages);
         } catch (storageError) {
           debugPrint('[CreateFoundPage] Storage upload error: $storageError');
         }
@@ -127,19 +125,21 @@ class _CreateFoundPageState extends ConsumerState<CreateFoundPage> {
 
       context.go(AppRoutes.home);
     } on FirebaseException catch (e, stack) {
-      debugPrint('[CreateFoundPage] FirebaseException: ${e.code} - ${e.message}\n$stack');
+      debugPrint(
+        '[CreateFoundPage] FirebaseException: ${e.code} - ${e.message}\n$stack',
+      );
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: ${e.message ?? e.code}')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error: ${e.message ?? e.code}')));
     } catch (e, stack) {
       debugPrint('[CreateFoundPage] Generic error: $e\n$stack');
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Unable to save item: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Unable to save item: $e')));
     } finally {
       if (mounted) {
         setState(() {
@@ -240,7 +240,8 @@ class _CreateFoundPageState extends ConsumerState<CreateFoundPage> {
                   maxLines: 5,
                   decoration: _inputDecoration(
                     label: 'Description',
-                    hint: 'Describe the item and where the owner can retrieve it.',
+                    hint:
+                        'Describe the item and where the owner can retrieve it.',
                     icon: Icons.description_outlined,
                   ),
                   validator: (value) {

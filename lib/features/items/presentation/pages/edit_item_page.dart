@@ -101,10 +101,9 @@ class _EditItemPageState extends ConsumerState<EditItemPage> {
       // Step 1: Upload any new local images
       List<String> newlyUploadedUrls = const [];
       if (_newSelectedFiles.isNotEmpty) {
-        newlyUploadedUrls = await ref.read(storageServiceProvider).uploadItemImages(
-              userId: user.uid,
-              images: _newSelectedFiles,
-            );
+        newlyUploadedUrls = await ref
+            .read(storageServiceProvider)
+            .uploadItemImages(userId: user.uid, images: _newSelectedFiles);
       }
 
       final combinedUrls = [..._existingUrls, ...newlyUploadedUrls];

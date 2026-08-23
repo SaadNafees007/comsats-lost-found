@@ -1,0 +1,83 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../authentication/presentation/providers/auth_provider.dart';
+import '../../data/datasources/claim_remote_datasource.dart';
+import '../../data/repositories/claim_repository_impl.dart';
+import '../../domain/entities/claim_entity.dart';
+import '../../domain/repositories/claim_repository.dart';
+
+final claimRemoteDataSourceProvider = Provider<ClaimRemoteDataSource>((ref) {
+  return ClaimRemoteDataSource();
+});
+
+final claimRepositoryProvider = Provider<ClaimRepository>((ref) {
+  return ClaimRepositoryImpl(
+    remoteDataSource: ref.watch(claimRemoteDataSourceProvider),
+  );
+});
+
+/// Claims submitted TO my items (I am the item owner reviewing incoming claims)
+final claimsForItemProvider =
+    StreamProvider.family<List<ClaimEntity>, String>((ref, itemId) {
+  return ref.watch(claimRepositoryProvider).getClaimsForItem(itemId);
+});
+
+/// Claims I submitted myself as a claimant
+final myClaimsProvider = StreamProvider<List<ClaimEntity>>((ref) {
+  final user = ref.watch(authStateProvider).valueOrNull;
+  if (user == null) return Stream.value(const <ClaimEntity>[]);
+  return ref.watch(claimRepositoryProvider).getMyClaims(user.uid);
+});
+
+/// Notifier for submit-claim action with loading/error state
+class SubmitClaimNotifier extends AsyncNotifier<void> {
+  @override
+  Future<void> build() async {}
+
+  Future<void> submit(ClaimEntity claim) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      await ref.read(claimRepositoryProvider).submitClaim(claim);
+    });
+  }
+}
+
+final submitClaimProvider =
+    AsyncNotifierProvider<SubmitClaimNotifier, void>(SubmitClaimNotifier.new);
+
+/// Notifier for accept/reject claim action with loading/error state
+class ReviewClaimNotifier extends AsyncNotifier<void> {
+  @override
+  Future<void> build() async {}
+
+  Future<void> accept({
+    required String claimId,
+    required String itemId,
+  }) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      await ref.read(claimRepositoryProvider).updateClaimStatus(
+            claimId: claimId,
+            itemId: itemId,
+            newStatus: ClaimStatus.accepted,
+          );
+    });
+  }
+
+  Future<void> reject({
+    required String claimId,
+    required String itemId,
+  }) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      await ref.read(claimRepositoryProvider).updateClaimStatus(
+            claimId: claimId,
+            itemId: itemId,
+            newStatus: ClaimStatus.rejected,
+          );
+    });
+  }
+}
+
+final reviewClaimProvider =
+    AsyncNotifierProvider<ReviewClaimNotifier, void>(ReviewClaimNotifier.new);

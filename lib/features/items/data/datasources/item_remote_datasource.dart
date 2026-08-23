@@ -4,7 +4,7 @@ import '../models/item_model.dart';
 
 class ItemRemoteDataSource {
   ItemRemoteDataSource({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
+    : _firestore = firestore ?? FirebaseFirestore.instance;
 
   final FirebaseFirestore _firestore;
 
@@ -34,6 +34,13 @@ class ItemRemoteDataSource {
     return ItemModel.fromFirestore(document);
   }
 
+  Stream<ItemModel?> watchItem(String itemId) {
+    return _itemsCollection.doc(itemId).snapshots().map((doc) {
+      if (!doc.exists) return null;
+      return ItemModel.fromFirestore(doc);
+    });
+  }
+
   Stream<List<ItemModel>> getItems() {
     return _itemsCollection.snapshots().map((snapshot) {
       final items = snapshot.docs.map(ItemModel.fromFirestore).toList();
@@ -51,14 +58,14 @@ class ItemRemoteDataSource {
         .where('ownerId', isEqualTo: ownerId)
         .snapshots()
         .map((snapshot) {
-      final items = snapshot.docs.map(ItemModel.fromFirestore).toList();
-      items.sort((a, b) {
-        final aTime = a.createdAt ?? a.date;
-        final bTime = b.createdAt ?? b.date;
-        return bTime.compareTo(aTime);
-      });
-      return items;
-    });
+          final items = snapshot.docs.map(ItemModel.fromFirestore).toList();
+          items.sort((a, b) {
+            final aTime = a.createdAt ?? a.date;
+            final bTime = b.createdAt ?? b.date;
+            return bTime.compareTo(aTime);
+          });
+          return items;
+        });
   }
 
   Future<void> updateItem(ItemModel item) {

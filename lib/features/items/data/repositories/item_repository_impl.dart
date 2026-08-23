@@ -35,6 +35,11 @@ class ItemRepositoryImpl implements ItemRepository {
   }
 
   @override
+  Stream<ItemEntity?> watchItem(String itemId) {
+    return _remoteDataSource.watchItem(itemId);
+  }
+
+  @override
   Stream<List<ItemEntity>> getItems() {
     return _remoteDataSource.getItems();
   }

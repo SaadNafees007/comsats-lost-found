@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -68,13 +67,18 @@ class _ImagePickerFieldState extends ConsumerState<ImagePickerField> {
                       color: AppColors.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Icon(Icons.camera_alt_outlined, color: AppColors.primary),
+                    child: const Icon(
+                      Icons.camera_alt_outlined,
+                      color: AppColors.primary,
+                    ),
                   ),
                   title: const Text('Take Photo'),
                   subtitle: const Text('Use your device camera'),
                   onTap: () async {
                     Navigator.pop(ctx);
-                    final image = await ref.read(imageServiceProvider).pickImageFromCamera();
+                    final image = await ref
+                        .read(imageServiceProvider)
+                        .pickImageFromCamera();
                     if (image != null && mounted) {
                       setState(() {
                         _selectedFiles.add(image);
@@ -91,16 +95,19 @@ class _ImagePickerFieldState extends ConsumerState<ImagePickerField> {
                       color: AppColors.secondary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Icon(Icons.photo_library_outlined, color: AppColors.secondary),
+                    child: const Icon(
+                      Icons.photo_library_outlined,
+                      color: AppColors.secondary,
+                    ),
                   ),
                   title: const Text('Choose from Gallery'),
                   subtitle: const Text('Select one or more photos'),
                   onTap: () async {
                     Navigator.pop(ctx);
                     final remainingSlots = widget.maxImages - _totalImagesCount;
-                    final images = await ref.read(imageServiceProvider).pickMultiImages(
-                          limit: remainingSlots,
-                        );
+                    final images = await ref
+                        .read(imageServiceProvider)
+                        .pickMultiImages(limit: remainingSlots);
                     if (images.isNotEmpty && mounted) {
                       setState(() {
                         _selectedFiles.addAll(images.take(remainingSlots));
@@ -206,27 +213,23 @@ class _ImagePickerFieldState extends ConsumerState<ImagePickerField> {
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(12),
-                        child: CachedNetworkImage(
-                          imageUrl: _existingUrls[i],
+                        child: Image.network(
+                          _existingUrls[i],
                           width: 100,
                           height: 110,
                           fit: BoxFit.cover,
-                          placeholder: (context, url) => Container(
-                            width: 100,
-                            height: 110,
-                            color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                            child: const Center(
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            ),
-                          ),
-                          errorWidget: (context, url, error) => Container(
-                            width: 100,
-                            height: 110,
-                            color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                            child: const Icon(Icons.broken_image_outlined),
-                          ),
+                          errorBuilder: (context, error, stackTrace) =>
+                              Container(
+                                width: 100,
+                                height: 110,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.surfaceContainerHighest,
+                                child: const Icon(Icons.broken_image_outlined),
+                              ),
                         ),
                       ),
+
                       Positioned(
                         top: 4,
                         right: 4,
@@ -238,7 +241,11 @@ class _ImagePickerFieldState extends ConsumerState<ImagePickerField> {
                               color: Colors.black54,
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.close, size: 14, color: Colors.white),
+                            child: const Icon(
+                              Icons.close,
+                              size: 14,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),
@@ -266,9 +273,13 @@ class _ImagePickerFieldState extends ConsumerState<ImagePickerField> {
                                 );
                               }
                               return Container(
-                                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.surfaceContainerHighest,
                                 child: const Center(
-                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
                                 ),
                               );
                             },
@@ -286,7 +297,11 @@ class _ImagePickerFieldState extends ConsumerState<ImagePickerField> {
                               color: Colors.black54,
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.close, size: 14, color: Colors.white),
+                            child: const Icon(
+                              Icons.close,
+                              size: 14,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),

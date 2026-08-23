@@ -6,7 +6,7 @@ import 'package:uuid/uuid.dart';
 
 class StorageService {
   StorageService({FirebaseStorage? firebaseStorage})
-      : _storage = firebaseStorage ?? FirebaseStorage.instance;
+    : _storage = firebaseStorage ?? FirebaseStorage.instance;
 
   final FirebaseStorage _storage;
   final Uuid _uuid = const Uuid();

@@ -1,14 +1,9 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../app/theme/app_colors.dart';
 
 class ImageCarousel extends StatefulWidget {
-  const ImageCarousel({
-    super.key,
-    required this.imageUrls,
-    this.height = 250,
-  });
+  const ImageCarousel({super.key, required this.imageUrls, this.height = 250});
 
   final List<String> imageUrls;
   final double height;
@@ -51,15 +46,29 @@ class _ImageCarouselState extends State<ImageCarousel> {
                   child: InteractiveViewer(
                     minScale: 0.8,
                     maxScale: 4.0,
-                    child: CachedNetworkImage(
-                      imageUrl: widget.imageUrls[index],
+                    child: Image.network(
+                      widget.imageUrls[index],
                       fit: BoxFit.contain,
-                      placeholder: (context, url) => const Center(
-                        child: CircularProgressIndicator(color: Colors.white),
-                      ),
-                      errorWidget: (context, url, error) => const Center(
-                        child: Icon(Icons.broken_image_outlined, size: 64, color: Colors.white54),
-                      ),
+                      loadingBuilder: (context, child, progress) {
+                        if (progress == null) return child;
+                        return Center(
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            value: progress.expectedTotalBytes != null
+                                ? progress.cumulativeBytesLoaded /
+                                      progress.expectedTotalBytes!
+                                : null,
+                          ),
+                        );
+                      },
+                      errorBuilder: (context, error, stackTrace) =>
+                          const Center(
+                            child: Icon(
+                              Icons.broken_image_outlined,
+                              size: 64,
+                              color: Colors.white54,
+                            ),
+                          ),
                     ),
                   ),
                 );
@@ -100,22 +109,39 @@ class _ImageCarouselState extends State<ImageCarousel> {
                       onTap: () => _openFullScreenViewer(context, index),
                       child: Hero(
                         tag: 'item_image_$url',
-                        child: CachedNetworkImage(
-                          imageUrl: url,
+                        child: Image.network(
+                          url,
                           fit: BoxFit.cover,
                           width: double.infinity,
-                          placeholder: (context, url) => Container(
-                            color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                            child: const Center(
-                              child: CircularProgressIndicator(strokeWidth: 2.5),
-                            ),
-                          ),
-                          errorWidget: (context, url, error) => Container(
-                            color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                            child: const Center(
-                              child: Icon(Icons.broken_image_outlined, size: 48),
-                            ),
-                          ),
+                          loadingBuilder: (context, child, progress) {
+                            if (progress == null) return child;
+                            return Container(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.surfaceContainerHighest,
+                              child: Center(
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.5,
+                                  value: progress.expectedTotalBytes != null
+                                      ? progress.cumulativeBytesLoaded /
+                                            progress.expectedTotalBytes!
+                                      : null,
+                                ),
+                              ),
+                            );
+                          },
+                          errorBuilder: (context, error, stackTrace) =>
+                              Container(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.surfaceContainerHighest,
+                                child: const Center(
+                                  child: Icon(
+                                    Icons.broken_image_outlined,
+                                    size: 48,
+                                  ),
+                                ),
+                              ),
                         ),
                       ),
                     );
@@ -127,7 +153,10 @@ class _ImageCarouselState extends State<ImageCarousel> {
                   bottom: 12,
                   right: 12,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.black.withValues(alpha: 0.65),
                       borderRadius: BorderRadius.circular(20),

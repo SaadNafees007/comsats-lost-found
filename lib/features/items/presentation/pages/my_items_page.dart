@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -238,7 +237,10 @@ class _MyItemCard extends StatelessWidget {
                     children: [
                       Text(
                         item.title,
-                        style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+                        style: const TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                       const SizedBox(height: 6),
                       Text(
@@ -253,27 +255,22 @@ class _MyItemCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                if (item.imageUrls.isNotEmpty) ...[
+                if (item.imageUrls.isNotEmpty &&
+                    item.imageUrls.first.isNotEmpty) ...[
                   const SizedBox(width: 12),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(10),
-                    child: CachedNetworkImage(
-                      imageUrl: item.imageUrls.first,
+                    child: Image.network(
+                      item.imageUrls.first,
                       width: 64,
                       height: 64,
                       fit: BoxFit.cover,
-                      placeholder: (context, url) => Container(
+                      errorBuilder: (context, error, stackTrace) => Container(
                         width: 64,
                         height: 64,
-                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                        child: const Center(
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                      ),
-                      errorWidget: (context, url, error) => Container(
-                        width: 64,
-                        height: 64,
-                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.surfaceContainerHighest,
                         child: const Icon(Icons.image_outlined, size: 24),
                       ),
                     ),

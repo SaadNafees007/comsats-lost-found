@@ -3,7 +3,7 @@ import 'package:image_picker/image_picker.dart';
 
 class ImageService {
   ImageService({ImagePicker? imagePicker})
-      : _picker = imagePicker ?? ImagePicker();
+    : _picker = imagePicker ?? ImagePicker();
 
   final ImagePicker _picker;
 

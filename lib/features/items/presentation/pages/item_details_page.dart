@@ -1,7 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/theme/app_colors.dart';
+import '../../../claims/presentation/pages/item_claims_page.dart';
+import '../../../claims/presentation/widgets/submit_claim_sheet.dart';
 import '../../domain/entities/item_entity.dart';
 import '../providers/item_provider.dart';
 import '../widgets/image_carousel.dart';
@@ -35,9 +38,7 @@ class ItemDetailsPage extends ConsumerWidget {
                 Text(error.toString(), textAlign: TextAlign.center),
                 const SizedBox(height: 20),
                 ElevatedButton(
-                  onPressed: () {
-                    ref.invalidate(itemDetailsProvider(itemId));
-                  },
+                  onPressed: () => ref.invalidate(itemDetailsProvider(itemId)),
                   child: const Text('Retry'),
                 ),
               ],
@@ -48,7 +49,6 @@ class ItemDetailsPage extends ConsumerWidget {
           if (item == null) {
             return const Center(child: Text('Item not found.'));
           }
-
           return _ItemDetailsContent(item: item);
         },
       ),
@@ -63,6 +63,8 @@ class _ItemDetailsContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    final isOwner = currentUser?.uid == item.ownerId;
     final isLost = item.type == ItemType.lost;
     final typeColor = isLost ? AppColors.error : AppColors.success;
     final typeText = isLost ? 'LOST' : 'FOUND';
@@ -97,9 +99,7 @@ class _ItemDetailsContent extends StatelessWidget {
                   ),
                 ),
               ),
-
               const Spacer(),
-
               Text(
                 item.category,
                 style: TextStyle(
@@ -136,20 +136,15 @@ class _ItemDetailsContent extends StatelessWidget {
             title: 'Location',
             value: item.location,
           ),
-
           const SizedBox(height: 14),
-
           _InfoRow(
             icon: Icons.calendar_today_outlined,
             title: 'Date',
-            value:
-                '${item.date.day.toString().padLeft(2, '0')}/'
+            value: '${item.date.day.toString().padLeft(2, '0')}/'
                 '${item.date.month.toString().padLeft(2, '0')}/'
                 '${item.date.year}',
           ),
-
           const SizedBox(height: 14),
-
           _InfoRow(
             icon: Icons.info_outline,
             title: 'Status',
@@ -158,31 +153,78 @@ class _ItemDetailsContent extends StatelessWidget {
 
           const SizedBox(height: 30),
 
-          if (item.type == ItemType.lost)
+          // === OWNER VIEW: See claims ===
+          if (isOwner) ...[
             SizedBox(
               height: 50,
               width: double.infinity,
-              child: ElevatedButton.icon(
+              child: OutlinedButton.icon(
                 onPressed: () {
-                  // Claim / recovery flow in Milestone 2
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => ItemClaimsPage(item: item),
+                    ),
+                  );
                 },
-                icon: const Icon(Icons.contact_page_outlined),
-                label: const Text('I Found This Item'),
+                icon: const Icon(Icons.assignment_outlined),
+                label: const Text('View Incoming Claims'),
               ),
             ),
+          ],
 
-          if (item.type == ItemType.found)
-            SizedBox(
-              height: 50,
+          // === NON-OWNER VIEW: Submit a claim ===
+          if (!isOwner && item.status == ItemStatus.active) ...[
+            if (item.type == ItemType.lost)
+              SizedBox(
+                height: 50,
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () =>
+                      showSubmitClaimSheet(context, item: item),
+                  icon: const Icon(Icons.contact_page_outlined),
+                  label: const Text('I Found This Item'),
+                ),
+              ),
+            if (item.type == ItemType.found)
+              SizedBox(
+                height: 50,
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () =>
+                      showSubmitClaimSheet(context, item: item),
+                  icon: const Icon(Icons.verified_user_outlined),
+                  label: const Text('This Is My Item (Claim)'),
+                ),
+              ),
+          ],
+
+          // If item is already claimed / resolved, show status note
+          if (!isOwner && item.status != ItemStatus.active) ...[
+            Container(
               width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  // Claim / recovery flow in Milestone 2
-                },
-                icon: const Icon(Icons.verified_user_outlined),
-                label: const Text('This Is My Item (Claim)'),
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: Theme.of(context)
+                    .colorScheme
+                    .surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.lock_outline, size: 20),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      item.status == ItemStatus.claimed
+                          ? 'This item has been claimed and is under resolution.'
+                          : 'This item has been resolved and closed.',
+                      style: const TextStyle(fontSize: 13),
+                    ),
+                  ),
+                ],
               ),
             ),
+          ],
         ],
       ),
     );
@@ -192,10 +234,8 @@ class _ItemDetailsContent extends StatelessWidget {
     switch (status) {
       case ItemStatus.active:
         return 'Active';
-
       case ItemStatus.claimed:
         return 'Claimed';
-
       case ItemStatus.resolved:
         return 'Resolved';
     }

@@ -35,9 +35,9 @@ final myItemsProvider = StreamProvider<List<ItemEntity>>((ref) {
   return ref.watch(itemRepositoryProvider).getMyItems(user.uid);
 });
 
-final itemDetailsProvider = FutureProvider.family<ItemEntity?, String>((
+final itemDetailsProvider = StreamProvider.family<ItemEntity?, String>((
   ref,
   itemId,
 ) {
-  return ref.watch(itemRepositoryProvider).getItem(itemId);
+  return ref.watch(itemRepositoryProvider).watchItem(itemId);
 });

@@ -5,6 +5,8 @@ abstract class ItemRepository {
 
   Future<ItemEntity?> getItem(String itemId);
 
+  Stream<ItemEntity?> watchItem(String itemId);
+
   Stream<List<ItemEntity>> getItems();
 
   Stream<List<ItemEntity>> getMyItems(String ownerId);
