@@ -15,14 +15,6 @@ class MyItemsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(authStateProvider).valueOrNull;
-
-    if (user == null) {
-      return const Scaffold(
-        body: Center(child: Text('Please login to view your items.')),
-        bottomNavigationBar: AppBottomNavigation(currentIndex: 1),
-      );
-    }
-
     final itemsAsync = ref.watch(myItemsProvider);
 
     return Scaffold(
@@ -59,6 +51,10 @@ class MyItemsPage extends ConsumerWidget {
           );
         },
         data: (items) {
+          if (user == null) {
+            return const Center(child: Text('Please login to view your items.'));
+          }
+
           if (items.isEmpty) {
             return const _EmptyMyItems();
           }

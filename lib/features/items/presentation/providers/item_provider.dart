@@ -25,14 +25,22 @@ final itemsProvider = StreamProvider<List<ItemEntity>>((ref) {
   return ref.watch(itemRepositoryProvider).getItems();
 });
 
-final myItemsProvider = StreamProvider<List<ItemEntity>>((ref) {
-  final user = ref.watch(authStateProvider).valueOrNull;
+final myItemsProvider = StreamProvider<List<ItemEntity>>((ref) async* {
+  final authState = ref.watch(authStateProvider);
 
-  if (user == null) {
-    return Stream.value(const <ItemEntity>[]);
+  // While auth is still resolving, keep loading (yield nothing).
+  if (authState.isLoading) {
+    return;
   }
 
-  return ref.watch(itemRepositoryProvider).getMyItems(user.uid);
+  final user = authState.valueOrNull;
+
+  if (user == null) {
+    yield const <ItemEntity>[];
+    return;
+  }
+
+  yield* ref.watch(itemRepositoryProvider).getMyItems(user.uid);
 });
 
 final itemDetailsProvider = StreamProvider.family<ItemEntity?, String>((
