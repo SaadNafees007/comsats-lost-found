@@ -52,7 +52,9 @@ class MyItemsPage extends ConsumerWidget {
         },
         data: (items) {
           if (user == null) {
-            return const Center(child: Text('Please login to view your items.'));
+            return const Center(
+              child: Text('Please login to view your items.'),
+            );
           }
 
           if (items.isEmpty) {
