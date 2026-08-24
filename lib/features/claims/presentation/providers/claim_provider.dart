@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../authentication/presentation/providers/auth_provider.dart';
@@ -18,7 +16,7 @@ final claimRepositoryProvider = Provider<ClaimRepository>((ref) {
   );
 });
 
-/// Claims submitted TO my items (I am the item owner reviewing incoming claims)
+/// Claims submitted TO a specific item (item owner reviews incoming claims)
 final claimsForItemProvider = StreamProvider.family<List<ClaimEntity>, String>((
   ref,
   itemId,
@@ -26,19 +24,18 @@ final claimsForItemProvider = StreamProvider.family<List<ClaimEntity>, String>((
   return ref.watch(claimRepositoryProvider).getClaimsForItem(itemId);
 });
 
-final myClaimsProvider = StreamProvider<List<ClaimEntity>>((ref) {
-  final authState = ref.watch(authStateProvider);
+/// My submitted claims — scoped to the currently authenticated user.
+final myClaimsProvider = StreamProvider<List<ClaimEntity>>((ref) async* {
+  // Wait for auth to be resolved (not loading).
+  final authUser = await ref.watch(authStateProvider.future);
 
-  return authState.when(
-    data: (user) {
-      if (user == null) {
-        return Stream.value(const <ClaimEntity>[]);
-      }
-      return ref.watch(claimRepositoryProvider).getMyClaims(user.uid);
-    },
-    loading: () => StreamController<List<ClaimEntity>>().stream,
-    error: (error, stack) => Stream<List<ClaimEntity>>.error(error, stack),
-  );
+  if (authUser == null) {
+    yield const <ClaimEntity>[];
+    return;
+  }
+
+  // Auth is ready — stream claims for this user.
+  yield* ref.read(claimRepositoryProvider).getMyClaims(authUser.uid);
 });
 
 /// Notifier for submit-claim action with loading/error state

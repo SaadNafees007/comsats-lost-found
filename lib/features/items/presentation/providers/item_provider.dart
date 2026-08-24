@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../authentication/presentation/providers/auth_provider.dart';
@@ -23,23 +21,25 @@ final createItemProvider = Provider<CreateItem>((ref) {
   return CreateItem(repository: ref.watch(itemRepositoryProvider));
 });
 
+/// All items — used on home page (no auth dependency)
 final itemsProvider = StreamProvider<List<ItemEntity>>((ref) {
   return ref.watch(itemRepositoryProvider).getItems();
 });
 
-final myItemsProvider = StreamProvider<List<ItemEntity>>((ref) {
-  final authState = ref.watch(authStateProvider);
+/// My items — scoped to the currently authenticated user.
+/// Uses FutureProvider so we can await the auth state, then switch to a stream.
+final myItemsProvider = StreamProvider<List<ItemEntity>>((ref) async* {
+  // Wait for auth to be resolved (not loading).
+  final authUser = await ref.watch(authStateProvider.future);
 
-  return authState.when(
-    data: (user) {
-      if (user == null) {
-        return Stream.value(const <ItemEntity>[]);
-      }
-      return ref.watch(itemRepositoryProvider).getMyItems(user.uid);
-    },
-    loading: () => StreamController<List<ItemEntity>>().stream,
-    error: (error, stack) => Stream<List<ItemEntity>>.error(error, stack),
-  );
+  if (authUser == null) {
+    // User is not logged in – return empty list.
+    yield const <ItemEntity>[];
+    return;
+  }
+
+  // Auth is ready — stream items for this user.
+  yield* ref.read(itemRepositoryProvider).getMyItems(authUser.uid);
 });
 
 final itemDetailsProvider = StreamProvider.family<ItemEntity?, String>((
