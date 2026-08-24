@@ -25,17 +25,14 @@ final claimsForItemProvider = StreamProvider.family<List<ClaimEntity>, String>((
 });
 
 /// My submitted claims — scoped to the currently authenticated user.
-final myClaimsProvider = StreamProvider<List<ClaimEntity>>((ref) async* {
-  // Wait for auth to be resolved (not loading).
-  final authUser = await ref.watch(authStateProvider.future);
+final myClaimsProvider = StreamProvider<List<ClaimEntity>>((ref) {
+  final authUser = ref.watch(authStateProvider).valueOrNull;
 
   if (authUser == null) {
-    yield const <ClaimEntity>[];
-    return;
+    return Stream.value(const <ClaimEntity>[]);
   }
 
-  // Auth is ready — stream claims for this user.
-  yield* ref.read(claimRepositoryProvider).getMyClaims(authUser.uid);
+  return ref.watch(claimRepositoryProvider).getMyClaims(authUser.uid);
 });
 
 /// Notifier for submit-claim action with loading/error state

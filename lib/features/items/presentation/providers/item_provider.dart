@@ -28,18 +28,14 @@ final itemsProvider = StreamProvider<List<ItemEntity>>((ref) {
 
 /// My items — scoped to the currently authenticated user.
 /// Uses FutureProvider so we can await the auth state, then switch to a stream.
-final myItemsProvider = StreamProvider<List<ItemEntity>>((ref) async* {
-  // Wait for auth to be resolved (not loading).
-  final authUser = await ref.watch(authStateProvider.future);
+final myItemsProvider = StreamProvider<List<ItemEntity>>((ref) {
+  final authUser = ref.watch(authStateProvider).valueOrNull;
 
   if (authUser == null) {
-    // User is not logged in – return empty list.
-    yield const <ItemEntity>[];
-    return;
+    return Stream.value(const <ItemEntity>[]);
   }
 
-  // Auth is ready — stream items for this user.
-  yield* ref.read(itemRepositoryProvider).getMyItems(authUser.uid);
+  return ref.watch(itemRepositoryProvider).getMyItems(authUser.uid);
 });
 
 final itemDetailsProvider = StreamProvider.family<ItemEntity?, String>((
