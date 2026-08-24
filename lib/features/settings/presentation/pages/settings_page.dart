@@ -62,7 +62,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                   secondary: const Icon(Icons.notifications_active_outlined),
                   value: _notificationsEnabled,
-                  activeColor: AppColors.primary,
+                  activeThumbColor: AppColors.primary,
                   onChanged: (val) {
                     setState(() {
                       _notificationsEnabled = val;

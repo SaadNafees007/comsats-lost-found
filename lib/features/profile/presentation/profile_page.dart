@@ -6,9 +6,14 @@ import '../../../../app/router/app_routes.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../shared/widgets/navigation/bottom_navigation.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
@@ -24,41 +29,63 @@ class ProfilePage extends StatelessWidget {
     final displayName = user.displayName;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Profile')),
+      appBar: AppBar(
+        title: const Text('Profile'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit_outlined),
+            tooltip: 'Edit Profile Name',
+            onPressed: () => _showEditProfileDialog(context, user),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
               const SizedBox(height: 16),
-
               CircleAvatar(
                 radius: 48,
                 backgroundColor: AppColors.primary.withValues(alpha: 0.1),
                 child: Icon(Icons.person, size: 52, color: AppColors.primary),
               ),
-
               const SizedBox(height: 16),
-
-              Text(
-                displayName?.isNotEmpty == true ? displayName! : 'COMSATS User',
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    displayName?.isNotEmpty == true
+                        ? displayName!
+                        : 'COMSATS Student',
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  InkWell(
+                    onTap: () => _showEditProfileDialog(context, user),
+                    borderRadius: BorderRadius.circular(12),
+                    child: Padding(
+                      padding: const EdgeInsets.all(4),
+                      child: Icon(
+                        Icons.edit,
+                        size: 18,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-
               const SizedBox(height: 6),
-
               Text(
                 email,
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
-
               const SizedBox(height: 32),
-
               _ProfileSection(
                 title: 'Account',
                 children: [
@@ -70,7 +97,7 @@ class ProfilePage extends StatelessWidget {
                   _ProfileTile(
                     icon: Icons.verified_user_outlined,
                     title: 'Account Status',
-                    subtitle: 'Active',
+                    subtitle: 'Active COMSATS User',
                     trailing: Icon(
                       Icons.check_circle,
                       color: AppColors.success,
@@ -79,9 +106,7 @@ class ProfilePage extends StatelessWidget {
                   ),
                 ],
               ),
-
               const SizedBox(height: 24),
-
               _ProfileSection(
                 title: 'Application',
                 children: [
@@ -135,9 +160,7 @@ class ProfilePage extends StatelessWidget {
                   ),
                 ],
               ),
-
               const SizedBox(height: 32),
-
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(
@@ -150,9 +173,7 @@ class ProfilePage extends StatelessWidget {
                   ),
                 ),
               ),
-
               const SizedBox(height: 20),
-
               Text(
                 'COMSATS Lost & Found',
                 style: TextStyle(
@@ -166,6 +187,54 @@ class ProfilePage extends StatelessWidget {
       ),
       bottomNavigationBar: const AppBottomNavigation(currentIndex: 3),
     );
+  }
+
+  Future<void> _showEditProfileDialog(BuildContext context, User user) async {
+    final controller = TextEditingController(text: user.displayName);
+
+    final updated = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Edit Display Name'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(
+            labelText: 'Full Name / Roll Number',
+            hintText: 'e.g. Saad Nafees (FA21-BCS-001)',
+            border: OutlineInputBorder(),
+          ),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+
+    if (updated == true && controller.text.trim().isNotEmpty) {
+      try {
+        await user.updateDisplayName(controller.text.trim());
+        if (context.mounted) {
+          setState(() {});
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Profile updated successfully!')),
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to update profile: $e')),
+          );
+        }
+      }
+    }
   }
 
   Future<void> _showLogoutDialog(BuildContext context) async {
