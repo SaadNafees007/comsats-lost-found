@@ -1,1 +1,27 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"comsats-lost-found","appId":"1:762254696459:android:5e33c01ccbaef5ab58670e","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"comsats-lost-found","configurations":{"android":"1:762254696459:android:5e33c01ccbaef5ab58670e","web":"1:762254696459:web:2ff93dc28d5c443c58670e","windows":"1:762254696459:web:6ce825913b4ee53c58670e"}}}}}}
+{
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "comsats-lost-found",
+          "appId": "1:762254696459:android:5e33c01ccbaef5ab58670e",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "comsats-lost-found",
+          "configurations": {
+            "android": "1:762254696459:android:5e33c01ccbaef5ab58670e",
+            "web": "1:762254696459:web:2ff93dc28d5c443c58670e",
+            "windows": "1:762254696459:web:6ce825913b4ee53c58670e"
+          }
+        }
+      }
+    }
+  }
+}

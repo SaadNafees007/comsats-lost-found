@@ -26,6 +26,7 @@ class _EditItemPageState extends ConsumerState<EditItemPage> {
   late final TextEditingController _locationController;
 
   ItemEntity? _item;
+  ItemStatus _status = ItemStatus.active;
   List<String> _existingUrls = [];
   List<XFile> _newSelectedFiles = [];
   bool _isSaving = false;
@@ -58,6 +59,7 @@ class _EditItemPageState extends ConsumerState<EditItemPage> {
 
     _initialized = true;
     _item = item;
+    _status = item.status;
     _existingUrls = List.from(item.imageUrls);
 
     _titleController.text = item.title;
@@ -125,7 +127,7 @@ class _EditItemPageState extends ConsumerState<EditItemPage> {
         location: _locationController.text.trim(),
         date: item.date,
         imageUrls: combinedUrls,
-        status: item.status,
+        status: _status,
         createdAt: item.createdAt,
         updatedAt: DateTime.now(),
       );
@@ -209,6 +211,35 @@ class _EditItemPageState extends ConsumerState<EditItemPage> {
           _ReadOnlyInfo(
             label: 'Report Type',
             value: item.type == ItemType.lost ? 'Lost Item' : 'Found Item',
+          ),
+
+          const SizedBox(height: 16),
+
+          DropdownButtonFormField<ItemStatus>(
+            initialValue: _status,
+            decoration: const InputDecoration(
+              labelText: 'Item Status',
+              border: OutlineInputBorder(),
+            ),
+            items: const [
+              DropdownMenuItem(
+                value: ItemStatus.active,
+                child: Text('Active (Report Open)'),
+              ),
+              DropdownMenuItem(
+                value: ItemStatus.claimed,
+                child: Text('Claimed (Under Verification)'),
+              ),
+              DropdownMenuItem(
+                value: ItemStatus.resolved,
+                child: Text('Resolved (Item Recovered/Closed)'),
+              ),
+            ],
+            onChanged: (val) {
+              if (val != null) {
+                setState(() => _status = val);
+              }
+            },
           ),
 
           const SizedBox(height: 16),
