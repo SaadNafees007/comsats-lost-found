@@ -38,7 +38,7 @@ final authStateProvider = StreamProvider<User?>((ref) {
 });
 
 final currentUserProvider = FutureProvider<UserEntity?>((ref) async {
-  final authUser = ref.watch(authStateProvider).valueOrNull;
+  final authUser = await ref.watch(authStateProvider.future);
 
   if (authUser == null) {
     return null;

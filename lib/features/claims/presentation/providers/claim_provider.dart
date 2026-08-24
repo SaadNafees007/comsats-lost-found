@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../authentication/presentation/providers/auth_provider.dart';
@@ -24,11 +26,19 @@ final claimsForItemProvider = StreamProvider.family<List<ClaimEntity>, String>((
   return ref.watch(claimRepositoryProvider).getClaimsForItem(itemId);
 });
 
-/// Claims I submitted myself as a claimant
 final myClaimsProvider = StreamProvider<List<ClaimEntity>>((ref) {
-  final user = ref.watch(authStateProvider).valueOrNull;
-  if (user == null) return Stream.value(const <ClaimEntity>[]);
-  return ref.watch(claimRepositoryProvider).getMyClaims(user.uid);
+  final authState = ref.watch(authStateProvider);
+
+  return authState.when(
+    data: (user) {
+      if (user == null) {
+        return Stream.value(const <ClaimEntity>[]);
+      }
+      return ref.watch(claimRepositoryProvider).getMyClaims(user.uid);
+    },
+    loading: () => StreamController<List<ClaimEntity>>().stream,
+    error: (error, stack) => Stream<List<ClaimEntity>>.error(error, stack),
+  );
 });
 
 /// Notifier for submit-claim action with loading/error state

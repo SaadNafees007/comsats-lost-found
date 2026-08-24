@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../authentication/presentation/providers/auth_provider.dart';
@@ -25,22 +27,19 @@ final itemsProvider = StreamProvider<List<ItemEntity>>((ref) {
   return ref.watch(itemRepositoryProvider).getItems();
 });
 
-final myItemsProvider = StreamProvider<List<ItemEntity>>((ref) async* {
+final myItemsProvider = StreamProvider<List<ItemEntity>>((ref) {
   final authState = ref.watch(authStateProvider);
 
-  // While auth is still resolving, keep loading (yield nothing).
-  if (authState.isLoading) {
-    return;
-  }
-
-  final user = authState.valueOrNull;
-
-  if (user == null) {
-    yield const <ItemEntity>[];
-    return;
-  }
-
-  yield* ref.watch(itemRepositoryProvider).getMyItems(user.uid);
+  return authState.when(
+    data: (user) {
+      if (user == null) {
+        return Stream.value(const <ItemEntity>[]);
+      }
+      return ref.watch(itemRepositoryProvider).getMyItems(user.uid);
+    },
+    loading: () => StreamController<List<ItemEntity>>().stream,
+    error: (error, stack) => Stream<List<ItemEntity>>.error(error, stack),
+  );
 });
 
 final itemDetailsProvider = StreamProvider.family<ItemEntity?, String>((
