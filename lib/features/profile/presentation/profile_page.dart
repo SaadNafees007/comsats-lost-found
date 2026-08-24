@@ -125,6 +125,14 @@ class ProfilePage extends StatelessWidget {
                       context.push(AppRoutes.adminDashboard);
                     },
                   ),
+                  _ProfileTile(
+                    icon: Icons.settings_outlined,
+                    title: 'Settings',
+                    subtitle: 'Preferences & App version',
+                    onTap: () {
+                      context.push(AppRoutes.settings);
+                    },
+                  ),
                 ],
               ),
 

@@ -15,6 +15,7 @@ import '../../features/items/presentation/pages/my_items_page.dart';
 import '../../features/notifications/presentation/pages/notifications_page.dart';
 import '../../features/profile/presentation/profile_page.dart';
 import '../../features/search/presentation/pages/search_page.dart';
+import '../../features/settings/presentation/pages/settings_page.dart';
 import 'app_routes.dart';
 import 'route_guards.dart';
 
@@ -115,6 +116,11 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: AppRoutes.adminDashboard,
       builder: (context, state) => const AdminDashboardPage(),
+    ),
+
+    GoRoute(
+      path: AppRoutes.settings,
+      builder: (context, state) => const SettingsPage(),
     ),
   ],
 );
