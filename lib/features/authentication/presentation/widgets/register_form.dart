@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_routes.dart';
+import '../../../../core/constants/app_constants.dart';
 import '../providers/auth_provider.dart';
 
 class RegisterForm extends ConsumerStatefulWidget {
@@ -151,6 +152,15 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
 
               if (!email.contains('@')) {
                 return 'Please enter a valid email.';
+              }
+
+              if (AppConstants.enforceUniversityEmail) {
+                final hasAllowedDomain = AppConstants.allowedEmailDomains.any(
+                  (domain) => email.endsWith(domain),
+                );
+                if (!hasAllowedDomain) {
+                  return 'Please use an official COMSATS email address.';
+                }
               }
 
               return null;
