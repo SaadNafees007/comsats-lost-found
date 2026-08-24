@@ -47,9 +47,7 @@ class ClaimModel extends ClaimEntity {
       'proofImageUrls': proofImageUrls,
       'status': status.name,
       'createdAt': FieldValue.serverTimestamp(),
-      'reviewedAt': reviewedAt == null
-          ? null
-          : Timestamp.fromDate(reviewedAt!),
+      'reviewedAt': reviewedAt == null ? null : Timestamp.fromDate(reviewedAt!),
     };
   }
 

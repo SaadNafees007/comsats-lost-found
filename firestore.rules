@@ -1,0 +1,83 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // ==========================================
+    // Items Collection
+    // ==========================================
+    match /items/{itemId} {
+      // Authenticated users can browse and search reported items
+      allow read: if isAuthenticated();
+
+      // Authenticated users can post items where ownerId matches their UID
+      allow create: if isAuthenticated() 
+        && request.resource.data.ownerId == request.auth.uid;
+
+      // Owner or authenticated users (updating claim status) can update
+      allow update: if isAuthenticated();
+
+      // Only the owner can delete their item post
+      allow delete: if isAuthenticated() 
+        && resource.data.ownerId == request.auth.uid;
+    }
+
+    // ==========================================
+    // Claims Collection
+    // ==========================================
+    match /claims/{claimId} {
+      // Claimant or item owner can view claim details
+      allow read: if isAuthenticated() 
+        && (resource.data.claimantId == request.auth.uid 
+            || resource.data.itemOwnerId == request.auth.uid);
+
+      // Authenticated users can submit a claim
+      allow create: if isAuthenticated() 
+        && request.resource.data.claimantId == request.auth.uid;
+
+      // Item owner can review/update claim status
+      allow update: if isAuthenticated() 
+        && resource.data.itemOwnerId == request.auth.uid;
+
+      // Claimant can delete their claim
+      allow delete: if isAuthenticated() 
+        && resource.data.claimantId == request.auth.uid;
+    }
+
+    // ==========================================
+    // Notifications Collection
+    // ==========================================
+    match /notifications/{notificationId} {
+      // User can read notifications addressed to them
+      allow read: if isAuthenticated() 
+        && resource.data.recipientId == request.auth.uid;
+
+      // Any authenticated user can send a notification (e.g. claim submitted)
+      allow create: if isAuthenticated();
+
+      // Recipient can update (mark as read)
+      allow update: if isAuthenticated() 
+        && resource.data.recipientId == request.auth.uid;
+
+      // Recipient can delete notification
+      allow delete: if isAuthenticated() 
+        && resource.data.recipientId == request.auth.uid;
+    }
+
+    // ==========================================
+    // Users Collection
+    // ==========================================
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(userId);
+    }
+  }
+}

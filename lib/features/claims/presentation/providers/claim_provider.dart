@@ -17,8 +17,10 @@ final claimRepositoryProvider = Provider<ClaimRepository>((ref) {
 });
 
 /// Claims submitted TO my items (I am the item owner reviewing incoming claims)
-final claimsForItemProvider =
-    StreamProvider.family<List<ClaimEntity>, String>((ref, itemId) {
+final claimsForItemProvider = StreamProvider.family<List<ClaimEntity>, String>((
+  ref,
+  itemId,
+) {
   return ref.watch(claimRepositoryProvider).getClaimsForItem(itemId);
 });
 
@@ -42,21 +44,21 @@ class SubmitClaimNotifier extends AsyncNotifier<void> {
   }
 }
 
-final submitClaimProvider =
-    AsyncNotifierProvider<SubmitClaimNotifier, void>(SubmitClaimNotifier.new);
+final submitClaimProvider = AsyncNotifierProvider<SubmitClaimNotifier, void>(
+  SubmitClaimNotifier.new,
+);
 
 /// Notifier for accept/reject claim action with loading/error state
 class ReviewClaimNotifier extends AsyncNotifier<void> {
   @override
   Future<void> build() async {}
 
-  Future<void> accept({
-    required String claimId,
-    required String itemId,
-  }) async {
+  Future<void> accept({required String claimId, required String itemId}) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      await ref.read(claimRepositoryProvider).updateClaimStatus(
+      await ref
+          .read(claimRepositoryProvider)
+          .updateClaimStatus(
             claimId: claimId,
             itemId: itemId,
             newStatus: ClaimStatus.accepted,
@@ -64,13 +66,12 @@ class ReviewClaimNotifier extends AsyncNotifier<void> {
     });
   }
 
-  Future<void> reject({
-    required String claimId,
-    required String itemId,
-  }) async {
+  Future<void> reject({required String claimId, required String itemId}) async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      await ref.read(claimRepositoryProvider).updateClaimStatus(
+      await ref
+          .read(claimRepositoryProvider)
+          .updateClaimStatus(
             claimId: claimId,
             itemId: itemId,
             newStatus: ClaimStatus.rejected,
@@ -79,5 +80,6 @@ class ReviewClaimNotifier extends AsyncNotifier<void> {
   }
 }
 
-final reviewClaimProvider =
-    AsyncNotifierProvider<ReviewClaimNotifier, void>(ReviewClaimNotifier.new);
+final reviewClaimProvider = AsyncNotifierProvider<ReviewClaimNotifier, void>(
+  ReviewClaimNotifier.new,
+);

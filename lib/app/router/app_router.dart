@@ -1,15 +1,18 @@
 import 'package:go_router/go_router.dart';
 
+import '../../features/admin/presentation/pages/admin_dashboard_page.dart';
 import '../../features/authentication/presentation/pages/forgot_password_page.dart';
 import '../../features/authentication/presentation/pages/login_page.dart';
 import '../../features/authentication/presentation/pages/register_page.dart';
 import '../../features/authentication/presentation/pages/splash_page.dart';
+import '../../features/claims/presentation/pages/my_claims_page.dart';
 import '../../features/items/presentation/pages/create_found_page.dart';
 import '../../features/items/presentation/pages/create_lost_page.dart';
 import '../../features/items/presentation/pages/edit_item_page.dart';
 import '../../features/items/presentation/pages/home_page.dart';
 import '../../features/items/presentation/pages/item_details_page.dart';
 import '../../features/items/presentation/pages/my_items_page.dart';
+import '../../features/notifications/presentation/pages/notifications_page.dart';
 import '../../features/profile/presentation/profile_page.dart';
 import '../../features/search/presentation/pages/search_page.dart';
 import 'app_routes.dart';
@@ -97,6 +100,21 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: AppRoutes.profile,
       builder: (context, state) => const ProfilePage(),
+    ),
+
+    GoRoute(
+      path: AppRoutes.notifications,
+      builder: (context, state) => const NotificationsPage(),
+    ),
+
+    GoRoute(
+      path: AppRoutes.myClaims,
+      builder: (context, state) => const MyClaimsPage(),
+    ),
+
+    GoRoute(
+      path: AppRoutes.adminDashboard,
+      builder: (context, state) => const AdminDashboardPage(),
     ),
   ],
 );

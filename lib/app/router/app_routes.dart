@@ -44,10 +44,22 @@ class AppRoutes {
   static const String profile = '/profile';
 
   // ===========================
+  // Claims
+  // ===========================
+
+  static const String myClaims = '/claims/my-claims';
+
+  // ===========================
   // Notifications
   // ===========================
 
   static const String notifications = '/notifications';
+
+  // ===========================
+  // Admin
+  // ===========================
+
+  static const String adminDashboard = '/admin';
 
   // ===========================
   // Settings

@@ -2,15 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../app/theme/app_colors.dart';
+import '../../../notifications/domain/entities/notification_entity.dart';
+import '../../../notifications/presentation/providers/notification_provider.dart';
 import '../../../items/domain/entities/item_entity.dart';
 import '../../domain/entities/claim_entity.dart';
 import '../providers/claim_provider.dart';
 
 class ItemClaimsPage extends ConsumerWidget {
-  const ItemClaimsPage({
-    super.key,
-    required this.item,
-  });
+  const ItemClaimsPage({super.key, required this.item});
 
   final ItemEntity item;
 
@@ -70,8 +69,7 @@ class ItemClaimsPage extends ConsumerWidget {
                   SizedBox(height: 16),
                   Text(
                     'No claims yet',
-                    style:
-                        TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                   ),
                   SizedBox(height: 6),
                   Text(
@@ -88,10 +86,7 @@ class ItemClaimsPage extends ConsumerWidget {
             itemCount: claims.length,
             separatorBuilder: (_, _) => const SizedBox(height: 12),
             itemBuilder: (context, index) {
-              return _ClaimCard(
-                claim: claims[index],
-                itemId: item.id,
-              );
+              return _ClaimCard(claim: claims[index], itemId: item.id);
             },
           );
         },
@@ -144,13 +139,17 @@ class _ClaimCard extends ConsumerWidget {
                   child: Text(
                     'Claimant ID: ${claim.claimantId.substring(0, 8)}...',
                     style: const TextStyle(
-                        fontSize: 12, fontWeight: FontWeight.w500),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 4),
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: statusColor.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(20),
@@ -224,9 +223,9 @@ class _ClaimCard extends ConsumerWidget {
                           errorBuilder: (_, _, _) => Container(
                             width: 80,
                             height: 80,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .surfaceContainerHighest,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.surfaceContainerHighest,
                             child: const Icon(Icons.broken_image_outlined),
                           ),
                         ),
@@ -297,10 +296,32 @@ class _ClaimCard extends ConsumerWidget {
     );
     if (confirmed != true) return;
 
-    await ref.read(reviewClaimProvider.notifier).accept(
-          claimId: claim.id,
-          itemId: itemId,
-        );
+    await ref
+        .read(reviewClaimProvider.notifier)
+        .accept(claimId: claim.id, itemId: itemId);
+
+    if (claim.claimantId.isNotEmpty) {
+      try {
+        await ref
+            .read(notificationRepositoryProvider)
+            .sendNotification(
+              NotificationEntity(
+                id: '',
+                recipientId: claim.claimantId,
+                senderId: claim.itemOwnerId,
+                itemId: itemId,
+                title: 'Claim Accepted! 🎉',
+                body:
+                    'Your claim proof was accepted by the item owner. Tap to view item details.',
+                type: NotificationType.claimAccepted,
+                isRead: false,
+                createdAt: DateTime.now(),
+              ),
+            );
+      } catch (_) {
+        // Non-fatal notification error
+      }
+    }
 
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -322,15 +343,37 @@ class _ClaimCard extends ConsumerWidget {
     );
     if (confirmed != true) return;
 
-    await ref.read(reviewClaimProvider.notifier).reject(
-          claimId: claim.id,
-          itemId: itemId,
-        );
+    await ref
+        .read(reviewClaimProvider.notifier)
+        .reject(claimId: claim.id, itemId: itemId);
+
+    if (claim.claimantId.isNotEmpty) {
+      try {
+        await ref
+            .read(notificationRepositoryProvider)
+            .sendNotification(
+              NotificationEntity(
+                id: '',
+                recipientId: claim.claimantId,
+                senderId: claim.itemOwnerId,
+                itemId: itemId,
+                title: 'Claim Update',
+                body:
+                    'Your claim proof was reviewed and declined by the item owner.',
+                type: NotificationType.claimRejected,
+                isRead: false,
+                createdAt: DateTime.now(),
+              ),
+            );
+      } catch (_) {
+        // Non-fatal notification error
+      }
+    }
 
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Claim rejected.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Claim rejected.')));
     }
   }
 

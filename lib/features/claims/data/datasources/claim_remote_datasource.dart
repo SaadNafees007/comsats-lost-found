@@ -5,7 +5,7 @@ import '../models/claim_model.dart';
 
 class ClaimRemoteDataSource {
   ClaimRemoteDataSource({FirebaseFirestore? firestore})
-      : _firestore = firestore ?? FirebaseFirestore.instance;
+    : _firestore = firestore ?? FirebaseFirestore.instance;
 
   final FirebaseFirestore _firestore;
 
@@ -25,14 +25,13 @@ class ClaimRemoteDataSource {
   }
 
   Stream<List<ClaimModel>> getClaimsForItem(String itemId) {
-    return _claimsCollection
-        .where('itemId', isEqualTo: itemId)
-        .snapshots()
-        .map((snapshot) {
-      final claims = snapshot.docs.map(ClaimModel.fromFirestore).toList();
-      claims.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-      return claims;
-    });
+    return _claimsCollection.where('itemId', isEqualTo: itemId).snapshots().map(
+      (snapshot) {
+        final claims = snapshot.docs.map(ClaimModel.fromFirestore).toList();
+        claims.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        return claims;
+      },
+    );
   }
 
   Stream<List<ClaimModel>> getMyClaims(String claimantId) {
@@ -40,10 +39,10 @@ class ClaimRemoteDataSource {
         .where('claimantId', isEqualTo: claimantId)
         .snapshots()
         .map((snapshot) {
-      final claims = snapshot.docs.map(ClaimModel.fromFirestore).toList();
-      claims.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-      return claims;
-    });
+          final claims = snapshot.docs.map(ClaimModel.fromFirestore).toList();
+          claims.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+          return claims;
+        });
   }
 
   /// Updates the claim status, and also updates the parent item status atomically.

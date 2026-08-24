@@ -140,7 +140,8 @@ class _ItemDetailsContent extends StatelessWidget {
           _InfoRow(
             icon: Icons.calendar_today_outlined,
             title: 'Date',
-            value: '${item.date.day.toString().padLeft(2, '0')}/'
+            value:
+                '${item.date.day.toString().padLeft(2, '0')}/'
                 '${item.date.month.toString().padLeft(2, '0')}/'
                 '${item.date.year}',
           ),
@@ -179,8 +180,7 @@ class _ItemDetailsContent extends StatelessWidget {
                 height: 50,
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: () =>
-                      showSubmitClaimSheet(context, item: item),
+                  onPressed: () => showSubmitClaimSheet(context, item: item),
                   icon: const Icon(Icons.contact_page_outlined),
                   label: const Text('I Found This Item'),
                 ),
@@ -190,8 +190,7 @@ class _ItemDetailsContent extends StatelessWidget {
                 height: 50,
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: () =>
-                      showSubmitClaimSheet(context, item: item),
+                  onPressed: () => showSubmitClaimSheet(context, item: item),
                   icon: const Icon(Icons.verified_user_outlined),
                   label: const Text('This Is My Item (Claim)'),
                 ),
@@ -204,9 +203,7 @@ class _ItemDetailsContent extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: Theme.of(context)
-                    .colorScheme
-                    .surfaceContainerHighest,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(

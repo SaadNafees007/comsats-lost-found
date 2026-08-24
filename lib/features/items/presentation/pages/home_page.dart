@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/router/app_routes.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../shared/widgets/navigation/bottom_navigation.dart';
+import '../../../notifications/presentation/providers/notification_provider.dart';
 import '../../domain/entities/item_entity.dart';
 import '../providers/item_provider.dart';
 
@@ -130,14 +131,19 @@ class _HomePageState extends ConsumerState<HomePage> {
   @override
   Widget build(BuildContext context) {
     final itemsAsync = ref.watch(itemsProvider);
+    final unreadCount = ref.watch(unreadNotificationCountProvider);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('COMSATS Lost & Found'),
         actions: [
           IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.notifications_none),
+            onPressed: () => context.push(AppRoutes.notifications),
+            icon: Badge(
+              isLabelVisible: unreadCount > 0,
+              label: Text('$unreadCount'),
+              child: const Icon(Icons.notifications_none),
+            ),
             tooltip: 'Notifications',
           ),
         ],

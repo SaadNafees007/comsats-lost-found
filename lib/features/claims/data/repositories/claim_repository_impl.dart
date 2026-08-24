@@ -5,7 +5,7 @@ import '../models/claim_model.dart';
 
 class ClaimRepositoryImpl implements ClaimRepository {
   ClaimRepositoryImpl({required ClaimRemoteDataSource remoteDataSource})
-      : _remoteDataSource = remoteDataSource;
+    : _remoteDataSource = remoteDataSource;
 
   final ClaimRemoteDataSource _remoteDataSource;
 

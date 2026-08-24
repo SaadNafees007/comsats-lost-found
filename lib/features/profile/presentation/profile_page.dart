@@ -87,10 +87,26 @@ class ProfilePage extends StatelessWidget {
                 children: [
                   _ProfileTile(
                     icon: Icons.inventory_2_outlined,
-                    title: 'My Items',
-                    subtitle: 'View your reported items',
+                    title: 'My Reported Items',
+                    subtitle: 'View items you posted',
                     onTap: () {
                       context.go(AppRoutes.myItems);
+                    },
+                  ),
+                  _ProfileTile(
+                    icon: Icons.assignment_turned_in_outlined,
+                    title: 'My Submitted Claims',
+                    subtitle: 'View your claim requests',
+                    onTap: () {
+                      context.push(AppRoutes.myClaims);
+                    },
+                  ),
+                  _ProfileTile(
+                    icon: Icons.notifications_outlined,
+                    title: 'Notifications',
+                    subtitle: 'Claim updates & alerts',
+                    onTap: () {
+                      context.push(AppRoutes.notifications);
                     },
                   ),
                   _ProfileTile(
@@ -99,6 +115,14 @@ class ProfilePage extends StatelessWidget {
                     subtitle: 'Find lost and found items',
                     onTap: () {
                       context.go(AppRoutes.search);
+                    },
+                  ),
+                  _ProfileTile(
+                    icon: Icons.admin_panel_settings_outlined,
+                    title: 'Admin Dashboard',
+                    subtitle: 'Manage reports & moderation',
+                    onTap: () {
+                      context.push(AppRoutes.adminDashboard);
                     },
                   ),
                 ],

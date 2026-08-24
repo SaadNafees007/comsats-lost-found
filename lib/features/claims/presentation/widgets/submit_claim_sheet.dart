@@ -5,7 +5,9 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/services/storage_service.dart';
 import '../../../../shared/widgets/inputs/image_picker_field.dart';
-import '../../../claims/domain/entities/claim_entity.dart';
+import '../../../notifications/domain/entities/notification_entity.dart';
+import '../../../notifications/presentation/providers/notification_provider.dart';
+import '../../domain/entities/claim_entity.dart';
 import '../../../items/domain/entities/item_entity.dart';
 import '../providers/claim_provider.dart';
 
@@ -64,11 +66,9 @@ class _SubmitClaimSheetState extends ConsumerState<_SubmitClaimSheet> {
       List<String> proofImageUrls = const [];
       if (_proofImages.isNotEmpty) {
         try {
-          proofImageUrls =
-              await ref.read(storageServiceProvider).uploadItemImages(
-                    userId: user.uid,
-                    images: _proofImages,
-                  );
+          proofImageUrls = await ref
+              .read(storageServiceProvider)
+              .uploadItemImages(userId: user.uid, images: _proofImages);
         } catch (_) {
           // Non-fatal: proceed without images
         }
@@ -94,10 +94,35 @@ class _SubmitClaimSheetState extends ConsumerState<_SubmitClaimSheet> {
 
       final claimState = ref.read(submitClaimProvider);
       if (claimState.hasError) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${claimState.error}')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: ${claimState.error}')));
       } else {
+        // Dispatch notification to item owner
+        if (widget.item.ownerId.isNotEmpty) {
+          try {
+            await ref
+                .read(notificationRepositoryProvider)
+                .sendNotification(
+                  NotificationEntity(
+                    id: '',
+                    recipientId: widget.item.ownerId,
+                    senderId: user.uid,
+                    itemId: widget.item.id,
+                    title: 'New Claim Received',
+                    body:
+                        'Someone submitted a claim for "${widget.item.title}". Tap to review.',
+                    type: NotificationType.claimSubmitted,
+                    isRead: false,
+                    createdAt: DateTime.now(),
+                  ),
+                );
+          } catch (_) {
+            // Non-fatal notification error
+          }
+        }
+
+        if (!mounted) return;
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -109,9 +134,9 @@ class _SubmitClaimSheetState extends ConsumerState<_SubmitClaimSheet> {
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to submit claim: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to submit claim: $e')));
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }
