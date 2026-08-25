@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
@@ -24,6 +26,48 @@ class _ImageCarouselState extends State<ImageCarousel> {
   void dispose() {
     _pageController.dispose();
     super.dispose();
+  }
+
+  Widget _buildImage(String url, {bool isFullScreen = false}) {
+    if (url.startsWith('data:image')) {
+      // Extract the base64 part
+      final base64String = url.split(',').last;
+      final bytes = base64Decode(base64String);
+      return Image.memory(
+        bytes,
+        fit: isFullScreen ? BoxFit.contain : BoxFit.cover,
+        width: isFullScreen ? null : double.infinity,
+        errorBuilder: (context, error, stackTrace) => Container(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          child: const Center(
+            child: Icon(Icons.broken_image_outlined, size: 48),
+          ),
+        ),
+      );
+    }
+
+    return CachedNetworkImage(
+      imageUrl: url,
+      fit: isFullScreen ? BoxFit.contain : BoxFit.cover,
+      width: isFullScreen ? null : double.infinity,
+      placeholder: (context, url) => Container(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        child: Center(
+          child: CircularProgressIndicator(
+              strokeWidth: 2.5, color: isFullScreen ? Colors.white : null),
+        ),
+      ),
+      errorWidget: (context, url, error) => Container(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        child: Center(
+          child: Icon(
+            Icons.broken_image_outlined,
+            size: isFullScreen ? 64 : 48,
+            color: isFullScreen ? Colors.white54 : null,
+          ),
+        ),
+      ),
+    );
   }
 
   void _openFullScreenViewer(BuildContext context, int initialIndex) {
@@ -53,20 +97,7 @@ class _ImageCarouselState extends State<ImageCarousel> {
                   child: InteractiveViewer(
                     minScale: 0.8,
                     maxScale: 4.0,
-                    child: CachedNetworkImage(
-                      imageUrl: validList[index],
-                      fit: BoxFit.contain,
-                      placeholder: (context, url) => const Center(
-                        child: CircularProgressIndicator(color: Colors.white),
-                      ),
-                      errorWidget: (context, url, error) => const Center(
-                        child: Icon(
-                          Icons.broken_image_outlined,
-                          size: 64,
-                          color: Colors.white54,
-                        ),
-                      ),
-                    ),
+                    child: _buildImage(validList[index], isFullScreen: true),
                   ),
                 );
               },
@@ -107,30 +138,7 @@ class _ImageCarouselState extends State<ImageCarousel> {
                       onTap: () => _openFullScreenViewer(context, index),
                       child: Hero(
                         tag: 'item_image_$url',
-                        child: CachedNetworkImage(
-                          imageUrl: url,
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          placeholder: (context, url) => Container(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.surfaceContainerHighest,
-                            child: const Center(
-                              child: CircularProgressIndicator(strokeWidth: 2.5),
-                            ),
-                          ),
-                          errorWidget: (context, url, error) => Container(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.surfaceContainerHighest,
-                            child: const Center(
-                              child: Icon(
-                                Icons.broken_image_outlined,
-                                size: 48,
-                              ),
-                            ),
-                          ),
-                        ),
+                        child: _buildImage(url, isFullScreen: false),
                       ),
                     );
                   },

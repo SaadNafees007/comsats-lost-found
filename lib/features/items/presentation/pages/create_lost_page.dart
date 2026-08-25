@@ -81,12 +81,24 @@ class _CreateLostPageState extends ConsumerState<CreateLostPage> {
       // Step 1: Upload images if any
       List<String> imageUrls = const [];
       if (_selectedImages.isNotEmpty) {
-        try {
-          imageUrls = await ref
-              .read(storageServiceProvider)
-              .uploadItemImages(userId: user.uid, images: _selectedImages);
-        } catch (storageError) {
-          debugPrint('[CreateLostPage] Storage upload error: $storageError');
+        imageUrls = await ref
+            .read(storageServiceProvider)
+            .uploadItemImages(userId: user.uid, images: _selectedImages);
+
+        if (imageUrls.isEmpty && _selectedImages.isNotEmpty) {
+          // Upload failed — inform user and abort
+          if (!mounted) return;
+          setState(() { _isLoading = false; });
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Photo upload failed. Check your internet connection and try again. '
+                'If the problem persists, Firebase Storage rules may need to be deployed.',
+              ),
+              duration: Duration(seconds: 6),
+            ),
+          );
+          return;
         }
       }
 

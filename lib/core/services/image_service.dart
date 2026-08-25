@@ -9,9 +9,9 @@ class ImageService {
 
   /// Captures a single image from the camera with optimized size and compression.
   Future<XFile?> pickImageFromCamera({
-    double maxWidth = 1280,
-    double maxHeight = 1280,
-    int imageQuality = 80,
+    double maxWidth = 480,
+    double maxHeight = 480,
+    int imageQuality = 20,
   }) async {
     try {
       return await _picker.pickImage(
@@ -27,9 +27,9 @@ class ImageService {
 
   /// Picks a single image from the device gallery.
   Future<XFile?> pickImageFromGallery({
-    double maxWidth = 1280,
-    double maxHeight = 1280,
-    int imageQuality = 80,
+    double maxWidth = 480,
+    double maxHeight = 480,
+    int imageQuality = 20,
   }) async {
     try {
       return await _picker.pickImage(
@@ -45,9 +45,9 @@ class ImageService {
 
   /// Picks multiple images from the device gallery.
   Future<List<XFile>> pickMultiImages({
-    double maxWidth = 1280,
-    double maxHeight = 1280,
-    int imageQuality = 80,
+    double maxWidth = 480,
+    double maxHeight = 480,
+    int imageQuality = 20,
     int limit = 4,
   }) async {
     try {

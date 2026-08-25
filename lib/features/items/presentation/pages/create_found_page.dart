@@ -81,12 +81,23 @@ class _CreateFoundPageState extends ConsumerState<CreateFoundPage> {
       // Step 1: Upload photos to Firebase Storage
       List<String> imageUrls = const [];
       if (_selectedImages.isNotEmpty) {
-        try {
-          imageUrls = await ref
-              .read(storageServiceProvider)
-              .uploadItemImages(userId: user.uid, images: _selectedImages);
-        } catch (storageError) {
-          debugPrint('[CreateFoundPage] Storage upload error: $storageError');
+        imageUrls = await ref
+            .read(storageServiceProvider)
+            .uploadItemImages(userId: user.uid, images: _selectedImages);
+
+        if (imageUrls.isEmpty && _selectedImages.isNotEmpty) {
+          if (!mounted) return;
+          setState(() { _isLoading = false; });
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Photo upload failed. Check your internet connection and try again. '
+                'If the problem persists, Firebase Storage rules may need to be deployed.',
+              ),
+              duration: Duration(seconds: 6),
+            ),
+          );
+          return;
         }
       }
 

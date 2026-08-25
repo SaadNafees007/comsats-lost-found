@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -213,21 +214,37 @@ class _ImagePickerFieldState extends ConsumerState<ImagePickerField> {
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(12),
-                        child: Image.network(
-                          _existingUrls[i],
-                          width: 100,
-                          height: 110,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
-                              Container(
+                        child: _existingUrls[i].startsWith('data:image')
+                            ? Image.memory(
+                                base64Decode(_existingUrls[i].split(',').last),
                                 width: 100,
                                 height: 110,
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.surfaceContainerHighest,
-                                child: const Icon(Icons.broken_image_outlined),
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    Container(
+                                  width: 100,
+                                  height: 110,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.surfaceContainerHighest,
+                                  child: const Icon(Icons.broken_image_outlined),
+                                ),
+                              )
+                            : Image.network(
+                                _existingUrls[i],
+                                width: 100,
+                                height: 110,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    Container(
+                                  width: 100,
+                                  height: 110,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.surfaceContainerHighest,
+                                  child: const Icon(Icons.broken_image_outlined),
+                                ),
                               ),
-                        ),
                       ),
 
                       Positioned(
