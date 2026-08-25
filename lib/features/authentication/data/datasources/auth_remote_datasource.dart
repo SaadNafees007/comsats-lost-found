@@ -92,6 +92,32 @@ class AuthRemoteDataSource {
     return UserModel.fromFirestore(document);
   }
 
+  Future<void> createGoogleUserProfile({required User user}) async {
+    final existing = await _usersCollection.doc(user.uid).get();
+    if (existing.exists) return; // Don't overwrite existing profiles.
+
+    await _usersCollection.doc(user.uid).set({
+      'id': user.uid,
+      'email': user.email ?? '',
+      'displayName': user.displayName ?? '',
+      'photoUrl': user.photoURL ?? '',
+      'studentId': '',
+      'department': '',
+      'role': 'student',
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  Future<void> updateDisplayName({
+    required String uid,
+    required String displayName,
+  }) async {
+    await _usersCollection.doc(uid).update({
+      'displayName': displayName,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
   Future<void> resetPassword({required String email}) {
     return _authService.sendPasswordResetEmail(email: email);
   }

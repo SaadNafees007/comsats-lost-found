@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_routes.dart';
 import '../../../../app/theme/app_colors.dart';
+import '../../../authentication/presentation/providers/auth_provider.dart';
 import '../../../claims/domain/entities/claim_entity.dart';
 import '../../../items/domain/entities/item_entity.dart';
 import '../providers/admin_provider.dart';
@@ -13,103 +14,154 @@ class AdminDashboardPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final stats = ref.watch(adminStatsProvider);
+    final currentUserAsync = ref.watch(currentUserProvider);
 
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Admin Dashboard'),
-          bottom: const TabBar(
-            tabs: [
-              Tab(icon: Icon(Icons.inventory_2_outlined), text: 'All Reports'),
-              Tab(
-                icon: Icon(Icons.assignment_turned_in_outlined),
-                text: 'All Claims',
+    return currentUserAsync.when(
+      loading: () =>
+          const Scaffold(body: Center(child: CircularProgressIndicator())),
+      error: (e, _) => Scaffold(
+        appBar: AppBar(title: const Text('Admin Dashboard')),
+        body: Center(child: Text('Error loading profile: $e')),
+      ),
+      data: (userProfile) {
+        if (userProfile == null || userProfile.role != 'admin') {
+          return Scaffold(
+            appBar: AppBar(title: const Text('Access Denied')),
+            body: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.security, size: 72, color: Colors.red),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Access Denied',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'You do not have the required administrator permissions to view this dashboard.',
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton.icon(
+                      onPressed: () => context.go(AppRoutes.home),
+                      icon: const Icon(Icons.home),
+                      label: const Text('Back to Home'),
+                    ),
+                  ],
+                ),
               ),
-            ],
-          ),
-        ),
-        body: Column(
-          children: [
-            // Stats Banner
-            Container(
-              padding: const EdgeInsets.all(16),
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _StatCard(
-                          title: 'Total Posts',
-                          value: '${stats.totalItems}',
-                          icon: Icons.inventory_2,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _StatCard(
-                          title: 'Lost Items',
-                          value: '${stats.lostCount}',
-                          icon: Icons.search_off,
-                          color: Colors.orange,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _StatCard(
-                          title: 'Found Items',
-                          value: '${stats.foundCount}',
-                          icon: Icons.check_circle_outline,
-                          color: AppColors.secondary,
-                        ),
-                      ),
-                    ],
+            ),
+          );
+        }
+
+        final stats = ref.watch(adminStatsProvider);
+
+        return DefaultTabController(
+          length: 2,
+          child: Scaffold(
+            appBar: AppBar(
+              title: const Text('Admin Dashboard'),
+              bottom: const TabBar(
+                tabs: [
+                  Tab(
+                    icon: Icon(Icons.inventory_2_outlined),
+                    text: 'All Reports',
                   ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _StatCard(
-                          title: 'Total Claims',
-                          value: '${stats.totalClaims}',
-                          icon: Icons.assignment_outlined,
-                          color: Colors.purple,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _StatCard(
-                          title: 'Pending Claims',
-                          value: '${stats.pendingClaims}',
-                          icon: Icons.pending_actions,
-                          color: Colors.amber,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: _StatCard(
-                          title: 'Resolved',
-                          value: '${stats.claimedCount}',
-                          icon: Icons.verified,
-                          color: AppColors.success,
-                        ),
-                      ),
-                    ],
+                  Tab(
+                    icon: Icon(Icons.assignment_turned_in_outlined),
+                    text: 'All Claims',
                   ),
                 ],
               ),
             ),
-            const Expanded(
-              child: TabBarView(
-                children: [_AdminItemsTab(), _AdminClaimsTab()],
-              ),
+            body: Column(
+              children: [
+                // Stats Banner
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _StatCard(
+                              title: 'Total Posts',
+                              value: '${stats.totalItems}',
+                              icon: Icons.inventory_2,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: _StatCard(
+                              title: 'Lost Items',
+                              value: '${stats.lostCount}',
+                              icon: Icons.search_off,
+                              color: Colors.orange,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: _StatCard(
+                              title: 'Found Items',
+                              value: '${stats.foundCount}',
+                              icon: Icons.check_circle_outline,
+                              color: AppColors.secondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _StatCard(
+                              title: 'Total Claims',
+                              value: '${stats.totalClaims}',
+                              icon: Icons.assignment_outlined,
+                              color: Colors.purple,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: _StatCard(
+                              title: 'Pending Claims',
+                              value: '${stats.pendingClaims}',
+                              icon: Icons.pending_actions,
+                              color: Colors.amber,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: _StatCard(
+                              title: 'Resolved',
+                              value: '${stats.claimedCount}',
+                              icon: Icons.verified,
+                              color: AppColors.success,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const Expanded(
+                  child: TabBarView(
+                    children: [_AdminItemsTab(), _AdminClaimsTab()],
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

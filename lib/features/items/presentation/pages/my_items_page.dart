@@ -6,6 +6,7 @@ import '../../../../app/router/app_routes.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../shared/widgets/navigation/bottom_navigation.dart';
 import '../../../authentication/presentation/providers/auth_provider.dart';
+import '../../../../core/services/storage_service.dart';
 import '../../domain/entities/item_entity.dart';
 import '../providers/item_provider.dart';
 
@@ -143,6 +144,16 @@ class MyItemsPage extends ConsumerWidget {
     }
 
     try {
+      if (item.imageUrls.isNotEmpty) {
+        try {
+          await ref
+              .read(storageServiceProvider)
+              .deleteItemImages(item.imageUrls);
+        } catch (e) {
+          debugPrint('[MyItemsPage] Storage cleanup failed: $e');
+        }
+      }
+
       await ref.read(itemRepositoryProvider).deleteItem(item.id);
 
       ref.invalidate(myItemsProvider);

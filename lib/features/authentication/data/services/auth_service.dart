@@ -36,12 +36,21 @@ class AuthService {
   }
 
   Future<UserCredential?> signInWithGoogle() async {
-    final GoogleSignIn googleSignIn = GoogleSignIn.instance;
+    final googleSignIn = GoogleSignIn.instance;
 
-    await googleSignIn.initialize();
+    // initialize() must be called before authenticate().
+    // Wrapping in try/catch handles the case where it was already called.
+    try {
+      await googleSignIn.initialize();
+    } catch (_) {
+      // Already initialized — safe to continue.
+    }
 
+    // authenticate() presents the Google account picker and returns the
+    // signed-in account. Throws if the user cancels or an error occurs.
     final GoogleSignInAccount googleUser = await googleSignIn.authenticate();
 
+    // In v7, .authentication is a synchronous getter — no await needed.
     final GoogleSignInAuthentication googleAuth = googleUser.authentication;
 
     final credential = GoogleAuthProvider.credential(

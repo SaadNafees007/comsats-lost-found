@@ -25,24 +25,21 @@ class ClaimRemoteDataSource {
   }
 
   Stream<List<ClaimModel>> getClaimsForItem(String itemId) {
-    return _claimsCollection.where('itemId', isEqualTo: itemId).snapshots().map(
-      (snapshot) {
-        final claims = snapshot.docs.map(ClaimModel.fromFirestore).toList();
-        claims.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-        return claims;
-      },
-    );
+    return _claimsCollection
+        .where('itemId', isEqualTo: itemId)
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) =>
+            snapshot.docs.map(ClaimModel.fromFirestore).toList());
   }
 
   Stream<List<ClaimModel>> getMyClaims(String claimantId) {
     return _claimsCollection
         .where('claimantId', isEqualTo: claimantId)
+        .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snapshot) {
-          final claims = snapshot.docs.map(ClaimModel.fromFirestore).toList();
-          claims.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-          return claims;
-        });
+        .map((snapshot) =>
+            snapshot.docs.map(ClaimModel.fromFirestore).toList());
   }
 
   /// Updates the claim status, and also updates the parent item status atomically.

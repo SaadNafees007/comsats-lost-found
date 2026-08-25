@@ -60,13 +60,19 @@ class AuthRepositoryImpl implements AuthRepository {
     if (user == null) {
       throw FirebaseAuthException(
         code: 'user-null',
-        message: 'Google sign-in failed. No user was returned.',
+        message: 'Google sign-in cancelled or failed.',
       );
     }
 
     final profile = await _remoteDataSource.getUserProfile(uid: user.uid);
 
-    return profile ?? _mapUser(user);
+    // If this is a new Google user, create a Firestore profile for them.
+    if (profile == null) {
+      await _remoteDataSource.createGoogleUserProfile(user: user);
+      return _mapUser(user);
+    }
+
+    return profile;
   }
 
   @override
@@ -77,6 +83,17 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<void> resetPassword({required String email}) {
     return _remoteDataSource.resetPassword(email: email);
+  }
+
+  @override
+  Future<void> updateDisplayName({
+    required String uid,
+    required String displayName,
+  }) {
+    return _remoteDataSource.updateDisplayName(
+      uid: uid,
+      displayName: displayName,
+    );
   }
 
   UserEntity _mapUser(User user) {

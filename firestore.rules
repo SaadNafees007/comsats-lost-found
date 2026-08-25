@@ -6,34 +6,52 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function isOwner(ownerId) {
+      return isAuthenticated() && request.auth.uid == ownerId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
     // ==========================================
     // Items Collection
     // ==========================================
     match /items/{itemId} {
       allow read: if isAuthenticated();
-      allow create: if isAuthenticated();
-      allow update: if isAuthenticated();
-      allow delete: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.ownerId == request.auth.uid;
+      allow update: if isOwner(resource.data.ownerId) || isAdmin();
+      allow delete: if isOwner(resource.data.ownerId) || isAdmin();
     }
 
     // ==========================================
     // Claims Collection
     // ==========================================
     match /claims/{claimId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated();
-      allow update: if isAuthenticated();
-      allow delete: if isAuthenticated();
+      allow read: if isAuthenticated() && (
+        request.auth.uid == resource.data.claimantId || 
+        request.auth.uid == resource.data.itemOwnerId || 
+        isAdmin()
+      );
+      allow create: if isAuthenticated() && request.resource.data.claimantId == request.auth.uid;
+      allow update: if isAuthenticated() && (
+        request.auth.uid == resource.data.itemOwnerId || 
+        request.auth.uid == resource.data.claimantId || 
+        isAdmin()
+      );
+      allow delete: if isAdmin();
     }
 
     // ==========================================
     // Notifications Collection
     // ==========================================
     match /notifications/{notificationId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated();
-      allow update: if isAuthenticated();
-      allow delete: if isAuthenticated();
+      allow read: if isAuthenticated() && (request.auth.uid == resource.data.recipientId || isAdmin());
+      allow create: if isAuthenticated() && (request.resource.data.senderId == request.auth.uid || isAdmin());
+      allow update: if isAuthenticated() && (request.auth.uid == resource.data.recipientId || isAdmin());
+      allow delete: if isAuthenticated() && (request.auth.uid == resource.data.recipientId || isAdmin());
     }
 
     // ==========================================
@@ -41,7 +59,9 @@ service cloud.firestore {
     // ==========================================
     match /users/{userId} {
       allow read: if isAuthenticated();
-      allow write: if isAuthenticated();
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      allow update: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      allow delete: if isAdmin();
     }
   }
 }

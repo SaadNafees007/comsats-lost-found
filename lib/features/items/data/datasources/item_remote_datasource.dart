@@ -42,30 +42,20 @@ class ItemRemoteDataSource {
   }
 
   Stream<List<ItemModel>> getItems() {
-    return _itemsCollection.snapshots().map((snapshot) {
-      final items = snapshot.docs.map(ItemModel.fromFirestore).toList();
-      items.sort((a, b) {
-        final aTime = a.createdAt ?? a.date;
-        final bTime = b.createdAt ?? b.date;
-        return bTime.compareTo(aTime);
-      });
-      return items;
-    });
+    return _itemsCollection
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) =>
+            snapshot.docs.map(ItemModel.fromFirestore).toList());
   }
 
   Stream<List<ItemModel>> getMyItems(String ownerId) {
     return _itemsCollection
         .where('ownerId', isEqualTo: ownerId)
+        .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snapshot) {
-          final items = snapshot.docs.map(ItemModel.fromFirestore).toList();
-          items.sort((a, b) {
-            final aTime = a.createdAt ?? a.date;
-            final bTime = b.createdAt ?? b.date;
-            return bTime.compareTo(aTime);
-          });
-          return items;
-        });
+        .map((snapshot) =>
+            snapshot.docs.map(ItemModel.fromFirestore).toList());
   }
 
   Future<void> updateItem(ItemModel item) {

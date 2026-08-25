@@ -15,14 +15,10 @@ class NotificationRemoteDataSource {
   Stream<List<NotificationModel>> getNotifications(String recipientId) {
     return _notificationsCollection
         .where('recipientId', isEqualTo: recipientId)
+        .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snapshot) {
-          final notifications = snapshot.docs
-              .map(NotificationModel.fromFirestore)
-              .toList();
-          notifications.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-          return notifications;
-        });
+        .map((snapshot) =>
+            snapshot.docs.map(NotificationModel.fromFirestore).toList());
   }
 
   /// Sends a new notification document.

@@ -1,19 +1,21 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_routes.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../shared/widgets/navigation/bottom_navigation.dart';
+import '../../authentication/presentation/providers/auth_provider.dart';
 
-class ProfilePage extends StatefulWidget {
+class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
 
   @override
-  State<ProfilePage> createState() => _ProfilePageState();
+  ConsumerState<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class _ProfilePageState extends ConsumerState<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
@@ -27,6 +29,10 @@ class _ProfilePageState extends State<ProfilePage> {
 
     final email = user.email ?? 'No email available';
     final displayName = user.displayName;
+
+    final profileAsync = ref.watch(currentUserProvider);
+    final userProfile = profileAsync.valueOrNull;
+    final isAdmin = userProfile?.role == 'admin';
 
     return Scaffold(
       appBar: AppBar(
@@ -94,10 +100,22 @@ class _ProfilePageState extends State<ProfilePage> {
                     title: 'Email',
                     subtitle: email,
                   ),
+                  if (userProfile?.studentId?.isNotEmpty == true)
+                    _ProfileTile(
+                      icon: Icons.badge_outlined,
+                      title: 'Student ID',
+                      subtitle: userProfile!.studentId!,
+                    ),
+                  if (userProfile?.department?.isNotEmpty == true)
+                    _ProfileTile(
+                      icon: Icons.school_outlined,
+                      title: 'Department',
+                      subtitle: userProfile!.department!,
+                    ),
                   _ProfileTile(
                     icon: Icons.verified_user_outlined,
                     title: 'Account Status',
-                    subtitle: 'Active COMSATS User',
+                    subtitle: isAdmin ? 'Administrator' : 'Active COMSATS User',
                     trailing: Icon(
                       Icons.check_circle,
                       color: AppColors.success,
@@ -142,14 +160,15 @@ class _ProfilePageState extends State<ProfilePage> {
                       context.go(AppRoutes.search);
                     },
                   ),
-                  _ProfileTile(
-                    icon: Icons.admin_panel_settings_outlined,
-                    title: 'Admin Dashboard',
-                    subtitle: 'Manage reports & moderation',
-                    onTap: () {
-                      context.push(AppRoutes.adminDashboard);
-                    },
-                  ),
+                  if (isAdmin)
+                    _ProfileTile(
+                      icon: Icons.admin_panel_settings_outlined,
+                      title: 'Admin Dashboard',
+                      subtitle: 'Manage reports & moderation',
+                      onTap: () {
+                        context.push(AppRoutes.adminDashboard);
+                      },
+                    ),
                   _ProfileTile(
                     icon: Icons.settings_outlined,
                     title: 'Settings',
@@ -219,8 +238,14 @@ class _ProfilePageState extends State<ProfilePage> {
     );
 
     if (updated == true && controller.text.trim().isNotEmpty) {
+      final newName = controller.text.trim();
       try {
-        await user.updateDisplayName(controller.text.trim());
+        await user.updateDisplayName(newName);
+        await ref
+            .read(updateDisplayNameProvider)
+            .call(uid: user.uid, displayName: newName);
+        ref.invalidate(currentUserProvider);
+
         if (context.mounted) {
           setState(() {});
           ScaffoldMessenger.of(context).showSnackBar(
@@ -268,7 +293,7 @@ class _ProfilePageState extends State<ProfilePage> {
       return;
     }
 
-    await FirebaseAuth.instance.signOut();
+    await ref.read(logoutProvider).call();
 
     if (!context.mounted) {
       return;

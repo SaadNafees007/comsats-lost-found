@@ -100,6 +100,19 @@ class _EditItemPageState extends ConsumerState<EditItemPage> {
     });
 
     try {
+      // Find deleted URLs to clean up Firebase Storage
+      final deletedUrls = item.imageUrls
+          .where((url) => !_existingUrls.contains(url))
+          .toList();
+
+      if (deletedUrls.isNotEmpty) {
+        try {
+          await ref.read(storageServiceProvider).deleteItemImages(deletedUrls);
+        } catch (e) {
+          debugPrint('[EditItemPage] Storage cleanup failed: $e');
+        }
+      }
+
       // Step 1: Upload any new local images
       List<String> newlyUploadedUrls = const [];
       if (_newSelectedFiles.isNotEmpty) {

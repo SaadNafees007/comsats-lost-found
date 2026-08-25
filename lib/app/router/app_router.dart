@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/admin/presentation/pages/admin_dashboard_page.dart';
@@ -17,10 +18,17 @@ import '../../features/profile/presentation/profile_page.dart';
 import '../../features/search/presentation/pages/search_page.dart';
 import '../../features/settings/presentation/pages/settings_page.dart';
 import 'app_routes.dart';
+import 'go_router_refresh_stream.dart';
 import 'route_guards.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: AppRoutes.splash,
+
+  // Re-evaluate redirect whenever Firebase auth state changes.
+  // This ensures users are sent to /login immediately after signing out.
+  refreshListenable: GoRouterRefreshStream(
+    FirebaseAuth.instance.authStateChanges(),
+  ),
 
   redirect: (context, state) {
     return authGuard(state.matchedLocation);
