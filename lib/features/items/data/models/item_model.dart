@@ -29,7 +29,8 @@ class ItemModel extends ItemEntity {
         if (data['date'] is Timestamp) {
           parsedDate = (data['date'] as Timestamp).toDate();
         } else if (data['date'] is String) {
-          parsedDate = DateTime.tryParse(data['date'] as String) ?? DateTime.now();
+          parsedDate =
+              DateTime.tryParse(data['date'] as String) ?? DateTime.now();
         }
       }
 

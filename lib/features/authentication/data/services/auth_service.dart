@@ -47,8 +47,8 @@ class AuthService {
     }
 
     // authenticate() presents the Google account picker and returns the
-    // signed-in account. Throws if the user cancels or an error occurs.
-    final GoogleSignInAccount googleUser = await googleSignIn.authenticate();
+    // signed-in account. Throws if the user cancels.
+    final googleUser = await googleSignIn.authenticate();
 
     // In v7, .authentication is a synchronous getter — no await needed.
     final GoogleSignInAuthentication googleAuth = googleUser.authentication;

@@ -20,7 +20,7 @@ class NotificationModel extends NotificationEntity {
   ) {
     try {
       final data = document.data() ?? <String, dynamic>{};
-      
+
       DateTime? parsedCreatedAt;
       if (data['createdAt'] != null && data['createdAt'] is Timestamp) {
         parsedCreatedAt = (data['createdAt'] as Timestamp).toDate();

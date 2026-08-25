@@ -79,9 +79,9 @@ class _LoginFormState extends ConsumerState<LoginForm> {
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(_firebaseErrorMessage(e.code))),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(_firebaseErrorMessage(e.code))));
     } catch (e) {
       debugPrint('[Google Sign-In] Error: $e');
 
@@ -91,14 +91,11 @@ class _LoginFormState extends ConsumerState<LoginForm> {
       final msg = e.toString().contains('ApiException')
           ? 'Google Sign-In failed. Ensure SHA-1 is added to Firebase Console and google-services.json is up to date.'
           : e.toString().contains('network')
-              ? 'Network error. Check your internet connection.'
-              : 'Google Sign-In failed: ${e.toString().split('\n').first}';
+          ? 'Network error. Check your internet connection.'
+          : 'Google Sign-In failed: ${e.toString().split('\n').first}';
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(msg),
-          duration: const Duration(seconds: 6),
-        ),
+        SnackBar(content: Text(msg), duration: const Duration(seconds: 6)),
       );
     } finally {
       if (mounted) {
