@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../app/theme/app_colors.dart';
@@ -16,6 +17,9 @@ class _ImageCarouselState extends State<ImageCarousel> {
   int _currentPage = 0;
   final PageController _pageController = PageController();
 
+  List<String> get _validUrls =>
+      widget.imageUrls.where((url) => url.trim().isNotEmpty).toList();
+
   @override
   void dispose() {
     _pageController.dispose();
@@ -23,6 +27,9 @@ class _ImageCarouselState extends State<ImageCarousel> {
   }
 
   void _openFullScreenViewer(BuildContext context, int initialIndex) {
+    final validList = _validUrls;
+    if (validList.isEmpty) return;
+
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         fullscreenDialog: true,
@@ -34,41 +41,31 @@ class _ImageCarouselState extends State<ImageCarousel> {
               backgroundColor: Colors.black,
               iconTheme: const IconThemeData(color: Colors.white),
               title: Text(
-                '${initialIndex + 1} / ${widget.imageUrls.length}',
+                '${initialIndex + 1} / ${validList.length}',
                 style: const TextStyle(color: Colors.white, fontSize: 16),
               ),
             ),
             body: PageView.builder(
               controller: pageController,
-              itemCount: widget.imageUrls.length,
+              itemCount: validList.length,
               itemBuilder: (context, index) {
                 return Center(
                   child: InteractiveViewer(
                     minScale: 0.8,
                     maxScale: 4.0,
-                    child: Image.network(
-                      widget.imageUrls[index],
+                    child: CachedNetworkImage(
+                      imageUrl: validList[index],
                       fit: BoxFit.contain,
-                      loadingBuilder: (context, child, progress) {
-                        if (progress == null) return child;
-                        return Center(
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            value: progress.expectedTotalBytes != null
-                                ? progress.cumulativeBytesLoaded /
-                                      progress.expectedTotalBytes!
-                                : null,
-                          ),
-                        );
-                      },
-                      errorBuilder: (context, error, stackTrace) =>
-                          const Center(
-                            child: Icon(
-                              Icons.broken_image_outlined,
-                              size: 64,
-                              color: Colors.white54,
-                            ),
-                          ),
+                      placeholder: (context, url) => const Center(
+                        child: CircularProgressIndicator(color: Colors.white),
+                      ),
+                      errorWidget: (context, url, error) => const Center(
+                        child: Icon(
+                          Icons.broken_image_outlined,
+                          size: 64,
+                          color: Colors.white54,
+                        ),
+                      ),
                     ),
                   ),
                 );
@@ -82,7 +79,8 @@ class _ImageCarouselState extends State<ImageCarousel> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.imageUrls.isEmpty) {
+    final validList = _validUrls;
+    if (validList.isEmpty) {
       return const SizedBox.shrink();
     }
 
@@ -97,58 +95,48 @@ class _ImageCarouselState extends State<ImageCarousel> {
                 borderRadius: BorderRadius.circular(16),
                 child: PageView.builder(
                   controller: _pageController,
-                  itemCount: widget.imageUrls.length,
+                  itemCount: validList.length,
                   onPageChanged: (index) {
                     setState(() {
                       _currentPage = index;
                     });
                   },
                   itemBuilder: (context, index) {
-                    final url = widget.imageUrls[index];
+                    final url = validList[index];
                     return GestureDetector(
                       onTap: () => _openFullScreenViewer(context, index),
                       child: Hero(
                         tag: 'item_image_$url',
-                        child: Image.network(
-                          url,
+                        child: CachedNetworkImage(
+                          imageUrl: url,
                           fit: BoxFit.cover,
                           width: double.infinity,
-                          loadingBuilder: (context, child, progress) {
-                            if (progress == null) return child;
-                            return Container(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.surfaceContainerHighest,
-                              child: Center(
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2.5,
-                                  value: progress.expectedTotalBytes != null
-                                      ? progress.cumulativeBytesLoaded /
-                                            progress.expectedTotalBytes!
-                                      : null,
-                                ),
+                          placeholder: (context, url) => Container(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.surfaceContainerHighest,
+                            child: const Center(
+                              child: CircularProgressIndicator(strokeWidth: 2.5),
+                            ),
+                          ),
+                          errorWidget: (context, url, error) => Container(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.surfaceContainerHighest,
+                            child: const Center(
+                              child: Icon(
+                                Icons.broken_image_outlined,
+                                size: 48,
                               ),
-                            );
-                          },
-                          errorBuilder: (context, error, stackTrace) =>
-                              Container(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.surfaceContainerHighest,
-                                child: const Center(
-                                  child: Icon(
-                                    Icons.broken_image_outlined,
-                                    size: 48,
-                                  ),
-                                ),
-                              ),
+                            ),
+                          ),
                         ),
                       ),
                     );
                   },
                 ),
               ),
-              if (widget.imageUrls.length > 1)
+              if (validList.length > 1)
                 Positioned(
                   bottom: 12,
                   right: 12,
@@ -162,7 +150,7 @@ class _ImageCarouselState extends State<ImageCarousel> {
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      '${_currentPage + 1}/${widget.imageUrls.length}',
+                      '${_currentPage + 1}/${validList.length}',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 12,
@@ -174,11 +162,11 @@ class _ImageCarouselState extends State<ImageCarousel> {
             ],
           ),
         ),
-        if (widget.imageUrls.length > 1) ...[
+        if (validList.length > 1) ...[
           const SizedBox(height: 10),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(widget.imageUrls.length, (index) {
+            children: List.generate(validList.length, (index) {
               final isSelected = index == _currentPage;
               return AnimatedContainer(
                 duration: const Duration(milliseconds: 250),
@@ -197,3 +185,4 @@ class _ImageCarouselState extends State<ImageCarousel> {
     );
   }
 }
+

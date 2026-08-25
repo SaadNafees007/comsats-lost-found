@@ -68,14 +68,46 @@ class _ItemDetailsContent extends StatelessWidget {
     final isLost = item.type == ItemType.lost;
     final typeColor = isLost ? AppColors.error : AppColors.success;
     final typeText = isLost ? 'LOST' : 'FOUND';
+    final validImages =
+        item.imageUrls.where((url) => url.trim().isNotEmpty).toList();
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (item.imageUrls.isNotEmpty) ...[
-            ImageCarousel(imageUrls: item.imageUrls),
+          if (validImages.isNotEmpty) ...[
+            ImageCarousel(imageUrls: validImages),
+            const SizedBox(height: 20),
+          ] else ...[
+            Container(
+              height: 160,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Theme.of(context).dividerColor),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    isLost ? Icons.search : Icons.inventory_2_outlined,
+                    size: 48,
+                    color: typeColor.withValues(alpha: 0.7),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'No photo attached by reporter',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
             const SizedBox(height: 20),
           ],
 
