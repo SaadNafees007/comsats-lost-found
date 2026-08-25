@@ -92,6 +92,46 @@ class MyItemsPage extends ConsumerWidget {
           );
         },
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showModalBottomSheet<void>(
+            context: context,
+            builder: (ctx) => SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ListTile(
+                      leading: const Icon(Icons.search, color: AppColors.error),
+                      title: const Text('Report Lost Item'),
+                      subtitle: const Text('Post something you lost on campus'),
+                      onTap: () {
+                        Navigator.pop(ctx);
+                        context.push(AppRoutes.createLost);
+                      },
+                    ),
+                    ListTile(
+                      leading: const Icon(
+                        Icons.inventory_2_outlined,
+                        color: AppColors.success,
+                      ),
+                      title: const Text('Report Found Item'),
+                      subtitle: const Text('Post something you found on campus'),
+                      onTap: () {
+                        Navigator.pop(ctx);
+                        context.push(AppRoutes.createFound);
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
+        tooltip: 'Report Item',
+        child: const Icon(Icons.add),
+      ),
       bottomNavigationBar: const AppBottomNavigation(currentIndex: 1),
     );
   }
@@ -396,6 +436,29 @@ class _EmptyMyItems extends StatelessWidget {
               style: TextStyle(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                FilledButton.icon(
+                  onPressed: () => context.push(AppRoutes.createLost),
+                  icon: const Icon(Icons.search, size: 18),
+                  label: const Text('Report Lost'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.error,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                FilledButton.icon(
+                  onPressed: () => context.push(AppRoutes.createFound),
+                  icon: const Icon(Icons.inventory_2_outlined, size: 18),
+                  label: const Text('Report Found'),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.success,
+                  ),
+                ),
+              ],
             ),
           ],
         ),

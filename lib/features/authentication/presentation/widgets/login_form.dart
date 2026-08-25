@@ -67,42 +67,6 @@ class _LoginFormState extends ConsumerState<LoginForm> {
     }
   }
 
-  Future<void> _loginWithGoogle() async {
-    ref.read(authLoadingProvider.notifier).state = true;
-
-    try {
-      await ref.read(loginWithGoogleProvider).call();
-
-      if (!mounted) return;
-
-      context.go(AppRoutes.home);
-    } on FirebaseAuthException catch (e) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(_firebaseErrorMessage(e.code))));
-    } catch (e) {
-      debugPrint('[Google Sign-In] Error: $e');
-
-      if (!mounted) return;
-
-      // Show the real error so configuration issues are visible
-      final msg = e.toString().contains('ApiException')
-          ? 'Google Sign-In failed. Ensure SHA-1 is added to Firebase Console and google-services.json is up to date.'
-          : e.toString().contains('network')
-          ? 'Network error. Check your internet connection.'
-          : 'Google Sign-In failed: ${e.toString().split('\n').first}';
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(msg), duration: const Duration(seconds: 6)),
-      );
-    } finally {
-      if (mounted) {
-        ref.read(authLoadingProvider.notifier).state = false;
-      }
-    }
-  }
 
   String _firebaseErrorMessage(String code) {
     switch (code) {
@@ -224,33 +188,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
             ),
           ),
 
-          const SizedBox(height: 16),
 
-          const Row(
-            children: [
-              Expanded(child: Divider()),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
-                child: Text('OR', style: TextStyle(color: Colors.grey)),
-              ),
-              Expanded(child: Divider()),
-            ],
-          ),
-
-          const SizedBox(height: 16),
-
-          SizedBox(
-            height: 52,
-            width: double.infinity,
-            child: OutlinedButton.icon(
-              onPressed: isLoading ? null : _loginWithGoogle,
-              icon: const Icon(Icons.g_mobiledata, size: 30),
-              label: const Text('Sign in with Google'),
-              style: OutlinedButton.styleFrom(
-                side: BorderSide(color: Theme.of(context).dividerColor),
-              ),
-            ),
-          ),
 
           const SizedBox(height: 16),
 
