@@ -18,24 +18,51 @@ class ClaimModel extends ClaimEntity {
   factory ClaimModel.fromFirestore(
     DocumentSnapshot<Map<String, dynamic>> document,
   ) {
-    final data = document.data() ?? <String, dynamic>{};
+    try {
+      final data = document.data() ?? <String, dynamic>{};
 
-    final createdAtTs = data['createdAt'] as Timestamp?;
-    final reviewedAtTs = data['reviewedAt'] as Timestamp?;
+      DateTime? parsedCreatedAt;
+      if (data['createdAt'] != null && data['createdAt'] is Timestamp) {
+        parsedCreatedAt = (data['createdAt'] as Timestamp).toDate();
+      }
 
-    return ClaimModel(
-      id: document.id,
-      itemId: data['itemId'] as String? ?? '',
-      claimantId: data['claimantId'] as String? ?? '',
-      itemOwnerId: data['itemOwnerId'] as String? ?? '',
-      proofDescription: data['proofDescription'] as String? ?? '',
-      proofImageUrls: List<String>.from(
-        data['proofImageUrls'] as List<dynamic>? ?? <dynamic>[],
-      ),
-      status: _statusFromString(data['status'] as String?),
-      createdAt: createdAtTs?.toDate() ?? DateTime.now(),
-      reviewedAt: reviewedAtTs?.toDate(),
-    );
+      DateTime? parsedReviewedAt;
+      if (data['reviewedAt'] != null && data['reviewedAt'] is Timestamp) {
+        parsedReviewedAt = (data['reviewedAt'] as Timestamp).toDate();
+      }
+
+      List<String> parsedUrls = [];
+      if (data['proofImageUrls'] != null) {
+        if (data['proofImageUrls'] is List) {
+          parsedUrls = (data['proofImageUrls'] as List)
+              .map((e) => e.toString())
+              .toList();
+        }
+      }
+
+      return ClaimModel(
+        id: document.id,
+        itemId: data['itemId'] as String? ?? '',
+        claimantId: data['claimantId'] as String? ?? '',
+        itemOwnerId: data['itemOwnerId'] as String? ?? '',
+        proofDescription: data['proofDescription'] as String? ?? '',
+        proofImageUrls: parsedUrls,
+        status: _statusFromString(data['status'] as String?),
+        createdAt: parsedCreatedAt ?? DateTime.now(),
+        reviewedAt: parsedReviewedAt,
+      );
+    } catch (e) {
+      return ClaimModel(
+        id: document.id,
+        itemId: '',
+        claimantId: '',
+        itemOwnerId: '',
+        proofDescription: 'Error loading claim: $e',
+        proofImageUrls: const [],
+        status: ClaimStatus.pending,
+        createdAt: DateTime.now(),
+      );
+    }
   }
 
   Map<String, dynamic> toFirestore() {

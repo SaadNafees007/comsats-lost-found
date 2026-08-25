@@ -21,30 +21,68 @@ class ItemModel extends ItemEntity {
   factory ItemModel.fromFirestore(
     DocumentSnapshot<Map<String, dynamic>> document,
   ) {
-    final data = document.data() ?? <String, dynamic>{};
+    try {
+      final data = document.data() ?? <String, dynamic>{};
 
-    final dateTimestamp = data['date'] as Timestamp?;
+      DateTime parsedDate = DateTime.now();
+      if (data['date'] != null) {
+        if (data['date'] is Timestamp) {
+          parsedDate = (data['date'] as Timestamp).toDate();
+        } else if (data['date'] is String) {
+          parsedDate = DateTime.tryParse(data['date'] as String) ?? DateTime.now();
+        }
+      }
 
-    final createdAtTimestamp = data['createdAt'] as Timestamp?;
+      DateTime? parsedCreatedAt;
+      if (data['createdAt'] != null && data['createdAt'] is Timestamp) {
+        parsedCreatedAt = (data['createdAt'] as Timestamp).toDate();
+      }
 
-    final updatedAtTimestamp = data['updatedAt'] as Timestamp?;
+      DateTime? parsedUpdatedAt;
+      if (data['updatedAt'] != null && data['updatedAt'] is Timestamp) {
+        parsedUpdatedAt = (data['updatedAt'] as Timestamp).toDate();
+      }
 
-    return ItemModel(
-      id: document.id,
-      ownerId: data['ownerId'] as String? ?? '',
-      type: _itemTypeFromString(data['type'] as String?),
-      title: data['title'] as String? ?? '',
-      description: data['description'] as String? ?? '',
-      category: data['category'] as String? ?? '',
-      location: data['location'] as String? ?? '',
-      date: dateTimestamp?.toDate() ?? DateTime.now(),
-      imageUrls: List<String>.from(
-        data['imageUrls'] as List<dynamic>? ?? <dynamic>[],
-      ),
-      status: _itemStatusFromString(data['status'] as String?),
-      createdAt: createdAtTimestamp?.toDate(),
-      updatedAt: updatedAtTimestamp?.toDate(),
-    );
+      List<String> parsedUrls = [];
+      if (data['imageUrls'] != null) {
+        if (data['imageUrls'] is List) {
+          parsedUrls = (data['imageUrls'] as List)
+              .map((e) => e.toString())
+              .toList();
+        }
+      }
+
+      return ItemModel(
+        id: document.id,
+        ownerId: data['ownerId'] as String? ?? '',
+        type: _itemTypeFromString(data['type'] as String?),
+        title: data['title'] as String? ?? '',
+        description: data['description'] as String? ?? '',
+        category: data['category'] as String? ?? '',
+        location: data['location'] as String? ?? '',
+        date: parsedDate,
+        imageUrls: parsedUrls,
+        status: _itemStatusFromString(data['status'] as String?),
+        createdAt: parsedCreatedAt,
+        updatedAt: parsedUpdatedAt,
+      );
+    } catch (e) {
+      // Return a safe fallback instead of throwing and crashing the entire Stream
+      return ItemModel(
+        id: document.id,
+        ownerId: '',
+        type: ItemType.lost,
+        title: 'Error Loading Item',
+        description: 'Failed to parse item document: $e',
+        category: '',
+        location: '',
+        date: DateTime.now(),
+        imageUrls: const [],
+        status: ItemStatus.active,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+    }
   }
 
   Map<String, dynamic> toFirestore() {

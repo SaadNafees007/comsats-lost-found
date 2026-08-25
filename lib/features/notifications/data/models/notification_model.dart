@@ -18,20 +18,38 @@ class NotificationModel extends NotificationEntity {
   factory NotificationModel.fromFirestore(
     DocumentSnapshot<Map<String, dynamic>> document,
   ) {
-    final data = document.data() ?? <String, dynamic>{};
-    final createdAtTimestamp = data['createdAt'] as Timestamp?;
+    try {
+      final data = document.data() ?? <String, dynamic>{};
+      
+      DateTime? parsedCreatedAt;
+      if (data['createdAt'] != null && data['createdAt'] is Timestamp) {
+        parsedCreatedAt = (data['createdAt'] as Timestamp).toDate();
+      }
 
-    return NotificationModel(
-      id: document.id,
-      recipientId: data['recipientId'] as String? ?? '',
-      senderId: data['senderId'] as String? ?? '',
-      itemId: data['itemId'] as String? ?? '',
-      title: data['title'] as String? ?? '',
-      body: data['body'] as String? ?? '',
-      type: _typeFromString(data['type'] as String?),
-      isRead: data['isRead'] as bool? ?? false,
-      createdAt: createdAtTimestamp?.toDate() ?? DateTime.now(),
-    );
+      return NotificationModel(
+        id: document.id,
+        recipientId: data['recipientId'] as String? ?? '',
+        senderId: data['senderId'] as String? ?? '',
+        itemId: data['itemId'] as String? ?? '',
+        title: data['title'] as String? ?? '',
+        body: data['body'] as String? ?? '',
+        type: _typeFromString(data['type'] as String?),
+        isRead: data['isRead'] as bool? ?? false,
+        createdAt: parsedCreatedAt ?? DateTime.now(),
+      );
+    } catch (e) {
+      return NotificationModel(
+        id: document.id,
+        recipientId: '',
+        senderId: '',
+        itemId: '',
+        title: 'Error Loading Notification',
+        body: 'Failed to parse notification: $e',
+        type: NotificationType.system,
+        isRead: true,
+        createdAt: DateTime.now(),
+      );
+    }
   }
 
   Map<String, dynamic> toFirestore() {

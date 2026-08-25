@@ -20,9 +20,8 @@ class ComsatsLostFoundApp extends ConsumerWidget {
       darkTheme: AppTheme.dark,
       themeMode: themeMode,
 
-      // Smooth theme transition — eliminates the glitch on mode change
-      themeAnimationDuration: const Duration(milliseconds: 350),
-      themeAnimationCurve: Curves.easeInOut,
+      // Instant theme switch — eliminates any rendering glitches during transition
+      themeAnimationDuration: Duration.zero,
 
       routerConfig: appRouter,
     );
